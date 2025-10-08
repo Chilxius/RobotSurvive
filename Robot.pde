@@ -21,7 +21,8 @@ class Robot extends MovingThing
   public void show()
   {
     //showDirectionDisplay();
-    recordAndDrawPointers();
+    if(!testMap.exiting)
+      recordAndDrawPointers();
     cosmetics.display(xPos+data.xOffset,yPos+data.yOffset);
     //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
   }
@@ -154,12 +155,12 @@ class Robot extends MovingThing
     float xRecovered = xPos + cos(angle) * 75;
     float yRecovered = yPos + sin(angle) * 75;
     
-    pointer.add( new Pointer( xRecovered, yRecovered ) );
+    pointer.add( new Pointer( xRecovered, yRecovered, turningClockwise ) );
     
     for(int i = 0; i < pointer.size(); i++)
     {
       pointer.get(i).life--;
-      pointer.get(i).drawPointer(turningClockwise);
+      pointer.get(i).drawPointer();
       if(pointer.get(i).life<=20)
       {
         pointer.remove(i);
@@ -178,32 +179,32 @@ class Pointer
 {
   float xPos, yPos;
   int life;
+  color col;
   
-  Pointer(float x, float y)
+  Pointer(float x, float y, boolean turningRight)
   {
     xPos = x;
     yPos = y;
     life = 50;
+    if(turningRight) col = color(200,0,0);
+    else             col = color(0,0,200);
   }
   
-  public void drawPointer( boolean turningRight )
+  public void drawPointer()
   {
     push();
     noStroke();
     //float opacity = life/4;
     //if( life == 49 )
     //  opacity = 255;
-    color pointColor;
-    if(turningRight) pointColor = color(200,0,0);
-    else             pointColor = color(0,0,200);
     
-    fill(pointColor);
+    fill(col);
     circle(xPos+data.xOffset,yPos+data.yOffset,life/7);
     
     ////Diagetic Player
     //if( life == 49 )
     //{
-    //  stroke(pointColor,20);
+    //  stroke(col,20);
     //  strokeWeight(0.75);
     //  //line(testBot.xPos+data.xOffset,testBot.yPos+data.yOffset-data.playerHitBox/2,xPos+data.xOffset,yPos+data.yOffset);
     //  line(width/2,0,xPos+data.xOffset,yPos+data.yOffset);

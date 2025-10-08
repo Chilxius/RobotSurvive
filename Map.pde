@@ -6,11 +6,14 @@ class Map
   int mapSize;
   Chunk [][] chunkGrid;// = new Chunk[mapSize][mapSize];
   
+  ArrayList<BeamBlock> frontBeams = new ArrayList<BeamBlock>();
+  //ArrayList<BeamBlock> backBeams = new ArrayList<BeamBlock>();
+  
   //For how often rooms expand (0.0 to 1.0)
   //Should be kept to 0.45 or below to prevent long recursion
   float openness = 0.25;
   
-  color wallColor = color( random(255), random(255), random(255) );
+  color wallColor = color( random(30,255), random(30,255), random(30,255) );
   
   //For exit
   float exitX, exitY;
@@ -26,12 +29,20 @@ class Map
     for( int i = 0; i < mapSize; i++ )
       for( int j = 0; j < mapSize; j++ )
         chunkGrid[i][j] = new Chunk(i,j);
-        
+    
+    createBeams();
     createRooms();
     createLegalPath();
     fillClosedRooms();
     addCaps();
     createExit();
+  }
+  
+  private void createBeams()
+  {
+    for( int i = 0; i <= mapSize*7+mapSize; i++ )
+      for( int j = 0; j < mapSize; j++ )
+        frontBeams.add( new BeamBlock( data.blockSize*(j*20)-data.blockSize*4, data.blockSize*i*2-data.blockSize*5, true ) );
   }
   
   private void createRooms()
@@ -355,21 +366,44 @@ class Map
     }
   }
   
-  public void drawBlocks( MovingThing m, boolean overlay )
+  //Layer: 0 - bottom layer(floors), 1 - middle layer(walls), 2 - top layer(overlay)
+  public void drawBlocks( MovingThing m, int layer )
   {
-    if(!overlay)
+    if(layer == 0)
       drawBackgroundBlocks();
     
     for( int i = 0; i < mapSize; i++ )
       for( int j = 0; j < mapSize; j++ )
-        chunkGrid[i][j].drawBlocks(m,wallColor,overlay);
+        chunkGrid[i][j].drawBlocks(m,wallColor,layer);
     //circle(exitX+data.xOffset,exitY+data.yOffset,data.blockSize);
+    
+    if(layer == 2)
+      drawForegroundBlocks(m);
   }
   
   private void drawBackgroundBlocks()
   {
+    //Girders behind elevator
     image(girder,exitX-data.blockSize/2+data.xOffset,exitY-data.blockSize/2+data.yOffset);
     image(girder,exitX+data.blockSize/2+data.xOffset,exitY-data.blockSize/2+data.yOffset);
+    
+    //Girders in distance
+    //for( int i = 0; i < width; i+=width/3 )
+    //  for( float j = -data.yOffset; j < height+data.yOffset; j+=data.blockSize )
+    //    image( g_back, i+data.xOffset, j+data.yOffset );
+  }
+  
+  private void drawForegroundBlocks(MovingThing m)
+  {    
+    if(exiting)
+    {
+      image(tile,chunkGrid[mapSize-1][0].blockGrid[3][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[3][5].yPos+data.yOffset);
+      image(tile,chunkGrid[mapSize-1][0].blockGrid[4][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[4][5].yPos+data.yOffset);
+    }
+    
+    for( BeamBlock b: frontBeams )
+      if( dist( m.xPos+data.xOffset, m.yPos+data.yOffset, b.xPos+data.xOffset*2, b.yPos+data.yOffset*2 ) < width )
+        b.drawBeam();
   }
   
   public Block intersectingBlock( MovingThing m )
@@ -399,10 +433,7 @@ class Map
     chunkGrid[mapSize-1][0].blockGrid[3][4].yPos++;
     chunkGrid[mapSize-1][0].blockGrid[4][3].yPos++;
     chunkGrid[mapSize-1][0].blockGrid[4][4].yPos++;
-    
-    image(tile,chunkGrid[mapSize-1][0].blockGrid[3][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[3][5].yPos+data.yOffset);
-    image(tile,chunkGrid[mapSize-1][0].blockGrid[4][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[4][5].yPos+data.yOffset);
-    
+
     testBot.yPos++;
     
     fade+= 255/data.blockSize;
@@ -425,14 +456,14 @@ class Chunk
   {
     for( int i = 0; i < 8; i++ )
       for( int j = 0; j < 8; j++ )
-        blockGrid[i][j] = new Block( i==0 || j==0 || i == 7 || j == 7, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
+        blockGrid[i][j] = new Block( i==0 || j==0 || i == 7 || j == 7, i==1 || j==1, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
   }
   
-  public void drawBlocks(MovingThing m, color c, boolean overlay)// int x, int y )
+  public void drawBlocks(MovingThing m, color c, int layer)// int x, int y )
   {
     for( int i = 0; i < 8; i++ )
       for( int j = 0; j < 8; j++ )
-        blockGrid[i][j].drawBlock(m,c,overlay);//x,y,i,j);
+        blockGrid[i][j].drawBlock(m,c,layer);//x,y,i,j);
   }
   
   private void addCaps()
@@ -440,7 +471,7 @@ class Chunk
     for( int i = 0; i < 8; i++ )
       for( int j = 1; j < 8; j++ )
         if( hasCap(i,j) )
-          blockGrid[i][j].addCap();// = new Block( i==0 || j==0 || i == 7 || j == 7, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
+          blockGrid[i][j].addCap();// = new Block( i==0 || j==0 || i == 7 || j == 7, i==1 || j==1, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
   }
   
   private boolean hasCap(int i, int j)
@@ -462,7 +493,7 @@ class Block
   int decoration = -1;
   boolean hasCap;
   
-  public Block( boolean wall, float x, float y )
+  public Block( boolean wall, boolean covered, float x, float y )
   {
     if( wall ) state = BlockState.SOLID;
     else state = BlockState.OPEN;
@@ -471,36 +502,40 @@ class Block
     yPos = y;
     hasCap = false;
     
-    if(random(100)>98) decoration = int(random(3));
+    setDecoration(covered);
   }
   
-  public void addCap()
+  private void addCap()
   {
     hasCap = true;
   }
   
-  void drawBlock(MovingThing m, color c, boolean overlay)// float cX, float cY, float bX, float bY )
+  private void setDecoration(boolean covered)
+  {
+    if(random(100)>98)
+    {
+      decoration = int(random(3))+1;
+      if( covered )
+        decoration = 0;
+    }
+  }
+  
+  void drawBlock(MovingThing m, color c, int layer)// float cX, float cY, float bX, float bY )
   {
     if( dist(m.xPos,m.yPos, xPos,yPos) > width*.80 ) return;
     
-    if(!overlay)
+    //Bottom Layer
+    if(layer == 0)
     {
       if( state == BlockState.OPEN || state == BlockState.DOOR )
         image(tile,xPos+data.xOffset,yPos+data.yOffset);
-      if( state == BlockState.SOLID )
-      {
-        push();
-        tint(c);
-        image(wall,xPos+data.xOffset,yPos+data.yOffset);
-        pop();
-      }
-      if( state == BlockState.DOOR )
-      {
-        push();
-        tint(dangerColor,150);
-        image(grid,xPos+data.xOffset,yPos+data.yOffset);
-        pop();
-      }
+      //if( state == BlockState.DOOR )
+      //{
+      //  push();
+      //  tint(dangerColor,150);
+      //  image(grid,xPos+data.xOffset,yPos+data.yOffset);
+      //  pop();
+      //}
       if( state == BlockState.EXIT )
       {
         image(exit,xPos+data.xOffset,yPos+data.yOffset);
@@ -508,14 +543,26 @@ class Block
       if( state == BlockState.OPEN && decoration != -1 )
         image(decor[decoration],xPos+data.xOffset,yPos+data.yOffset);
     }
-    else
+    //Middle Layer
+    else if(layer == 1)
     {
-      push();
-      tint(c);
-      if( hasCap )
-        image(cap,xPos+data.xOffset,yPos+data.yOffset);
-      pop();
+      if( state == BlockState.SOLID )
+      {
+        push();
+        tint(c);
+        image(wall,xPos+data.xOffset+data.blockSize/8,yPos+data.yOffset+data.blockSize/8);
+        pop();
+      }
     }
+    //Overlay (defunct)
+    //else
+    //{
+    //  push();
+    //  tint(c);
+    //  if( hasCap )
+    //    image(cap,xPos+data.xOffset,yPos+data.yOffset);
+    //  pop();
+    //}
   }
   
   public boolean intersects( MovingThing m )
@@ -528,6 +575,30 @@ class Block
     return false;
   }
 }
+
+//*************************************
+//Decorative forground/background beams
+class BeamBlock
+{
+  float xPos, yPos;
+  boolean big;
+  
+  BeamBlock( float x, float y, boolean b )
+  {
+    xPos = x;
+    yPos = y;
+    big  = b;
+  }
+  
+  public void drawBeam()
+  {
+    if( big )
+      image( g_front, xPos+data.xOffset*2, yPos+data.yOffset*2 );
+    else
+      image( g_back, xPos+data.xOffset/2, yPos+data.yOffset/2 );
+  }
+}
+
 
 public enum BlockState
 {

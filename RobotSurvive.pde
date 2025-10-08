@@ -7,7 +7,8 @@
 //BADDIES - (BEHAVIOR,COSMETICS)
 
 //Get the robot and map un-coupled for end-of-level operations
-//Panels under exit cover decoration
+
+//Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 
 import processing.sound.*;
 
@@ -21,7 +22,7 @@ GameData data;// = new GameData();
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 
-PImage tile,wall,cap,grid,decor[],exit,girder;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front;
 color dangerColor = color(0,0,200);
 
 void setup()
@@ -49,46 +50,18 @@ void setup()
   
   movers.add(testBot);
   
-  //TESTING
-  tile = loadImage("tile3.png");
-  tile.resize(0,int(data.blockSize));
-  wall = loadImage("wall.png");
-  wall.resize(0,int(data.blockSize));
-  cap = loadImage("wallCap4.png");
-  cap.resize(int(data.blockSize),0);
-  grid = loadImage("doorGrid3.png");
-  grid.resize(int(data.blockSize),0);
-  exit = loadImage("exit.png");
-  exit.resize(int(data.blockSize),0);
-  girder = loadImage("girder2.png");
-  girder.resize(int(data.blockSize),0);
-  decor = new PImage[3];
-  decor[0] = loadImage("decor1.png");
-  decor[0].resize(int(data.blockSize),0);
-  decor[1] = loadImage("decor2.png");
-  decor[1].resize(int(data.blockSize),0);
-  decor[2] = loadImage("decor3.png");
-  decor[2].resize(int(data.blockSize),0);
-  //borders = new PImage[5];
-  //borders[0] = loadImage("wallBorderL.png");
-  //borders[0].resize(int(data.blockSize),0);
-  //borders[1] = loadImage("wallBorderD.png");
-  //borders[1].resize(int(data.blockSize),0);
-  //borders[2] = loadImage("wallBorderR.png");
-  //borders[2].resize(int(data.blockSize),0);
-  //borders[3] = loadImage("capBorderL.png");
-  //borders[3].resize(int(data.blockSize),0);
-  //borders[4] = loadImage("capBorderR.png");
-  //borders[4].resize(int(data.blockSize),0);
 
+  
+  loadImages();
 }
 
 void draw()
 {
   background(0);
-  testMap.drawBlocks(testBot,false);
+  testMap.drawBlocks(testBot,0);
+  testMap.drawBlocks(testBot,1);
   testBot.show();
-  testMap.drawBlocks(testBot,true);
+  testMap.drawBlocks(testBot,2);
   
   if(testMap.exiting)
     testMap.lowerExit();
@@ -116,6 +89,35 @@ public void moveAllMovers()
       m.bounce(b);
     }
   }
+}
+
+public void loadImages()
+{
+  tile = loadImage("tile3.png");
+  tile.resize(0,int(data.blockSize));
+  wall = loadImage("wallLong9.png");
+  wall.resize(0,int(data.blockSize*1.25));
+  cap = loadImage("wallCap4.png");
+  cap.resize(int(data.blockSize),0);
+  grid = loadImage("doorGrid3.png");
+  grid.resize(int(data.blockSize),0);
+  exit = loadImage("exit.png");
+  exit.resize(int(data.blockSize),0);
+  girder = loadImage("girder2.png");
+  girder.resize(int(data.blockSize),0);
+  g_back = loadImage("girder_back.png");
+  g_back.resize(int(data.blockSize),0);
+  g_front = loadImage("girder_back.png");
+  g_front.resize(int(data.blockSize)*2,0);
+  decor = new PImage[4];
+  decor[0] = loadImage("decor0.png");
+  decor[0].resize(int(data.blockSize),0);
+  decor[1] = loadImage("decor1.png");
+  decor[1].resize(int(data.blockSize),0);
+  decor[2] = loadImage("decor2.png");
+  decor[2].resize(int(data.blockSize),0);
+  decor[3] = loadImage("decor3.png");
+  decor[3].resize(int(data.blockSize),0);
 }
 
 public void mousePressed()
