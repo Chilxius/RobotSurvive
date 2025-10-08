@@ -7,6 +7,7 @@
 //BADDIES - (BEHAVIOR,COSMETICS)
 
 //Get the robot and map un-coupled for end-of-level operations
+//Make Robot accelerate
 
 //Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 

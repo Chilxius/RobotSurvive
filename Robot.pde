@@ -167,9 +167,6 @@ class Robot extends MovingThing
         i--;
       }
     }
-    
-    for(Pointer p: pointer)
-      println(p.xPos + " " + p.yPos);
   }
 }
 
