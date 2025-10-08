@@ -29,8 +29,8 @@ class Map
         
     createRooms();
     createLegalPath();
-    addCaps();
     fillClosedRooms();
+    addCaps();
     createExit();
   }
   
@@ -337,8 +337,8 @@ class Map
         &&  chunkGrid[i][j].blockGrid[3][0].state == BlockState.SOLID
         &&  chunkGrid[i][j].blockGrid[3][7].state == BlockState.SOLID )
         {
-          for( int k = 1; k < 7; k++ )
-            for( int l = 1; l < 7; l++ )
+          for( int k = 0; k < 8; k++ )
+            for( int l = 0; l < 8; l++ )
               chunkGrid[i][j].blockGrid[k][l].state = BlockState.NONE;
         }
       }
@@ -357,9 +357,19 @@ class Map
   
   public void drawBlocks( MovingThing m, boolean overlay )
   {
+    if(!overlay)
+      drawBackgroundBlocks();
+    
     for( int i = 0; i < mapSize; i++ )
       for( int j = 0; j < mapSize; j++ )
         chunkGrid[i][j].drawBlocks(m,wallColor,overlay);
+    //circle(exitX+data.xOffset,exitY+data.yOffset,data.blockSize);
+  }
+  
+  private void drawBackgroundBlocks()
+  {
+    image(girder,exitX-data.blockSize/2+data.xOffset,exitY-data.blockSize/2+data.yOffset);
+    image(girder,exitX+data.blockSize/2+data.xOffset,exitY-data.blockSize/2+data.yOffset);
   }
   
   public Block intersectingBlock( MovingThing m )
@@ -492,7 +502,9 @@ class Block
         pop();
       }
       if( state == BlockState.EXIT )
+      {
         image(exit,xPos+data.xOffset,yPos+data.yOffset);
+      }
       if( state == BlockState.OPEN && decoration != -1 )
         image(decor[decoration],xPos+data.xOffset,yPos+data.yOffset);
     }

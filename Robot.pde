@@ -10,6 +10,8 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
+  ArrayList<Pointer> pointer = new ArrayList<Pointer>();
+  
   public Robot( String name, PApplet parent )
   {
     cosmetics = new CosmeticKit( name, parent );
@@ -18,12 +20,16 @@ class Robot extends MovingThing
   
   public void show()
   {
-    showDirectionDisplay();
+    //showDirectionDisplay();
+    recordAndDrawPointers();
     cosmetics.display(xPos+data.xOffset,yPos+data.yOffset);
+    //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
   }
   
   public void move()
   {
+    recordAndDrawPointers();
+    
     adjustToAngle();
     
     xPos += xSpd;
@@ -77,7 +83,7 @@ class Robot extends MovingThing
   
   private void checkForExit()
   {
-    if( dist( xPos, yPos, testMap.exitX, testMap.exitY ) < data.blockSize/2 )
+    if( dist( xPos, yPos, testMap.exitX, testMap.exitY-data.blockSize/3 ) < data.blockSize/2+data.playerHitBox/2 )
       testMap.exiting = true;
   }
   
@@ -105,12 +111,28 @@ class Robot extends MovingThing
     push();
     translate(xPos+data.xOffset, yPos+data.yOffset+data.playerHitBox*.75);
     rotate(angle);
-    strokeWeight(5);
-    line(0,0,75,0);
-    if(turningClockwise)
-      triangle(75,0, 65,0, 70,10);
-    else
-      triangle(75,0, 65,0, 70,-10);
+    //strokeWeight(5);
+    //line(0,0,75,0);
+    //if(turningClockwise)
+    //  triangle(75,0, 65,0, 70,10);
+    //else
+    //  triangle(75,0, 65,0, 70,-10);
+    noStroke();
+    color lightColor;
+    if(turningClockwise) lightColor = color(200,0,0);
+    else lightColor = color(0,0,200);
+    fill(lightColor);
+    circle(75,0,10);
+    if(turning)
+    {
+      fill(lightColor,75);
+      for(int i = 0; i < 10; i++)
+      {
+        if(turningClockwise) rotate(-0.05);
+        if(!turningClockwise)rotate(0.05);
+        circle(75,0,10-i);
+      }
+    }
     pop();
   }
   
@@ -125,6 +147,68 @@ class Robot extends MovingThing
   {
     turning = false;
     turningClockwise = !turningClockwise;
+  }
+  
+  private void recordAndDrawPointers()
+  {
+    float xRecovered = xPos + cos(angle) * 75;
+    float yRecovered = yPos + sin(angle) * 75;
+    
+    pointer.add( new Pointer( xRecovered, yRecovered ) );
+    
+    for(int i = 0; i < pointer.size(); i++)
+    {
+      pointer.get(i).life--;
+      pointer.get(i).drawPointer(turningClockwise);
+      if(pointer.get(i).life<=20)
+      {
+        pointer.remove(i);
+        i--;
+      }
+    }
+    
+    for(Pointer p: pointer)
+      println(p.xPos + " " + p.yPos);
+  }
+}
+
+//*****************************************
+// Laser Pointer for directing robot
+class Pointer
+{
+  float xPos, yPos;
+  int life;
+  
+  Pointer(float x, float y)
+  {
+    xPos = x;
+    yPos = y;
+    life = 50;
+  }
+  
+  public void drawPointer( boolean turningRight )
+  {
+    push();
+    noStroke();
+    //float opacity = life/4;
+    //if( life == 49 )
+    //  opacity = 255;
+    color pointColor;
+    if(turningRight) pointColor = color(200,0,0);
+    else             pointColor = color(0,0,200);
+    
+    fill(pointColor);
+    circle(xPos+data.xOffset,yPos+data.yOffset,life/7);
+    
+    ////Diagetic Player
+    //if( life == 49 )
+    //{
+    //  stroke(pointColor,20);
+    //  strokeWeight(0.75);
+    //  //line(testBot.xPos+data.xOffset,testBot.yPos+data.yOffset-data.playerHitBox/2,xPos+data.xOffset,yPos+data.yOffset);
+    //  line(width/2,0,xPos+data.xOffset,yPos+data.yOffset);
+    //}
+    pop();
   }
 }
 
@@ -159,8 +243,10 @@ class CosmeticKit
       
     image(basePic,0,0);
     
-    if(keyPressed) image(facePic2,0,0);
-    else           image(facePic,0,0);
+    //if(keyPressed) image(facePic2,0,0);
+    //else           image(facePic,0,0);
+    
+    image(facePic,0,0);
     
     pop();
   }
