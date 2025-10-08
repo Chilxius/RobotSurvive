@@ -12,6 +12,11 @@ class Map
   
   color wallColor = color( random(255), random(255), random(255) );
   
+  //For exit
+  float exitX, exitY;
+  boolean exiting;
+  float fade;
+  
   Map( int l )
   {
     level = l;
@@ -24,6 +29,7 @@ class Map
         
     createRooms();
     createLegalPath();
+    addCaps();
     fillClosedRooms();
     createExit();
   }
@@ -55,12 +61,25 @@ class Map
       }
   }
   
+  public void addCaps()
+  {
+    for( int i = 0; i < mapSize; i++ )
+      for( int j = 0; j < mapSize; j++ )
+        chunkGrid[i][j].addCaps();
+  }
+  
   private void createExit()
   {
     chunkGrid[mapSize-1][0].blockGrid[3][3].state = BlockState.EXIT;
     chunkGrid[mapSize-1][0].blockGrid[3][4].state = BlockState.EXIT;
     chunkGrid[mapSize-1][0].blockGrid[4][3].state = BlockState.EXIT;
     chunkGrid[mapSize-1][0].blockGrid[4][4].state = BlockState.EXIT;
+    
+    exitX = chunkGrid[mapSize-1][0].blockGrid[3][3].xPos+data.blockSize/2;
+    exitY = chunkGrid[mapSize-1][0].blockGrid[3][3].yPos+data.blockSize/2;
+    
+    exiting = false;
+    fade = 0;
   }
   
   private void spread(int x, int y)
@@ -82,7 +101,6 @@ class Map
     //No valid direction
     if( dir == -1 ) return;
     
-    println("About to add big door");
     addDoor(x,y,directionString(dir),true);
     if( dir == 0 ) spreadToRoom( x, y-1 );
     if( dir == 1 ) spreadToRoom( x+1, y );
@@ -337,11 +355,11 @@ class Map
     }
   }
   
-  public void drawBlocks( MovingThing m )
+  public void drawBlocks( MovingThing m, boolean overlay )
   {
     for( int i = 0; i < mapSize; i++ )
       for( int j = 0; j < mapSize; j++ )
-        chunkGrid[i][j].drawBlocks(m,wallColor);//i,j);
+        chunkGrid[i][j].drawBlocks(m,wallColor,overlay);
   }
   
   public Block intersectingBlock( MovingThing m )
@@ -364,6 +382,26 @@ class Map
       return chunkGrid[0][mapSize-1].blockGrid[3][4].yPos;
     return 0;
   }
+  
+  public void lowerExit()
+  {
+    chunkGrid[mapSize-1][0].blockGrid[3][3].yPos++;
+    chunkGrid[mapSize-1][0].blockGrid[3][4].yPos++;
+    chunkGrid[mapSize-1][0].blockGrid[4][3].yPos++;
+    chunkGrid[mapSize-1][0].blockGrid[4][4].yPos++;
+    
+    image(tile,chunkGrid[mapSize-1][0].blockGrid[3][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[3][5].yPos+data.yOffset);
+    image(tile,chunkGrid[mapSize-1][0].blockGrid[4][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[4][5].yPos+data.yOffset);
+    
+    testBot.yPos++;
+    
+    fade+= 255/data.blockSize;
+    
+    push();
+    fill(0,fade);
+    rect(width/2,height/2,width,height);
+    pop();
+  }
 }
 
 //**********************
@@ -380,16 +418,24 @@ class Chunk
         blockGrid[i][j] = new Block( i==0 || j==0 || i == 7 || j == 7, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
   }
   
-  public void drawBlocks(MovingThing m, color c)// int x, int y )
+  public void drawBlocks(MovingThing m, color c, boolean overlay)// int x, int y )
   {
     for( int i = 0; i < 8; i++ )
       for( int j = 0; j < 8; j++ )
-        blockGrid[i][j].drawBlock(m,c,hasCap(i,j));//x,y,i,j);
+        blockGrid[i][j].drawBlock(m,c,overlay);//x,y,i,j);
+  }
+  
+  private void addCaps()
+  {
+    for( int i = 0; i < 8; i++ )
+      for( int j = 1; j < 8; j++ )
+        if( hasCap(i,j) )
+          blockGrid[i][j].addCap();// = new Block( i==0 || j==0 || i == 7 || j == 7, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
   }
   
   private boolean hasCap(int i, int j)
   {
-    if( j > 0 && blockGrid[i][j-1].state != BlockState.SOLID )
+    if( blockGrid[i][j].state == BlockState.SOLID && blockGrid[i][j-1].state != BlockState.SOLID )
       return true;
     return false; 
   }
@@ -403,7 +449,8 @@ class Block
   
   float xPos, yPos;
   
-  boolean decorated;
+  int decoration = -1;
+  boolean hasCap;
   
   public Block( boolean wall, float x, float y )
   {
@@ -412,52 +459,55 @@ class Block
     
     xPos = x;
     yPos = y;
+    hasCap = false;
     
-    if(random(100)>99) decorated = true;
+    if(random(100)>98) decoration = int(random(3));
   }
   
-  void drawBlock(MovingThing m, color c, boolean hasCap)// float cX, float cY, float bX, float bY )
+  public void addCap()
   {
-    if( dist(m.xPos,m.yPos, xPos,yPos) > width ) return;
+    hasCap = true;
+  }
+  
+  void drawBlock(MovingThing m, color c, boolean overlay)// float cX, float cY, float bX, float bY )
+  {
+    if( dist(m.xPos,m.yPos, xPos,yPos) > width*.80 ) return;
     
-    switch(state)
+    if(!overlay)
     {
-      case OPEN:  fill(255); break;
-      case SOLID: fill(0); noStroke(); break;
-      case EXIT:  fill(200,100,100); break;
-      case DOOR:  fill(255);//00,200,100); break;
+      if( state == BlockState.OPEN || state == BlockState.DOOR )
+        image(tile,xPos+data.xOffset,yPos+data.yOffset);
+      if( state == BlockState.SOLID )
+      {
+        push();
+        tint(c);
+        image(wall,xPos+data.xOffset,yPos+data.yOffset);
+        pop();
+      }
+      if( state == BlockState.DOOR )
+      {
+        push();
+        tint(dangerColor,150);
+        image(grid,xPos+data.xOffset,yPos+data.yOffset);
+        pop();
+      }
+      if( state == BlockState.EXIT )
+        image(exit,xPos+data.xOffset,yPos+data.yOffset);
+      if( state == BlockState.OPEN && decoration != -1 )
+        image(decor[decoration],xPos+data.xOffset,yPos+data.yOffset);
     }
-    
-    //Draw based on chunk's index and block's index
-    rect( xPos+data.xOffset, yPos+data.yOffset, data.blockSize, data.blockSize );
-    if( state == BlockState.OPEN || state == BlockState.DOOR )
-      image(tile,xPos+data.xOffset,yPos+data.yOffset);
-    if( state == BlockState.SOLID )
+    else
     {
       push();
       tint(c);
-      image(wall,xPos+data.xOffset,yPos+data.yOffset);
       if( hasCap )
         image(cap,xPos+data.xOffset,yPos+data.yOffset);
       pop();
     }
-    if( state == BlockState.DOOR )
-    {
-      push();
-      tint(dangerColor,150);
-      image(grid,xPos+data.xOffset,yPos+data.yOffset);
-      pop();
-    }
-    if( state == BlockState.OPEN && decorated )
-      image(deco1,xPos+data.xOffset,yPos+data.yOffset);
-      
-    //rect( cX*blockSize*8+bX*blockSize+xOffset, cY*blockSize*8+bY*blockSize+yOffset, blockSize, blockSize );
   }
   
   public boolean intersects( MovingThing m )
   {
-    //return( abs(xPos - (m.xPos+m.size/2)) < data.blockSize/2 && abs(yPos - (m.yPos+m.size/2)) < data.blockSize/2 );
-    //return( abs(xPos - (m.xPos+m.size/2)) < data.blockSize && abs(yPos - (m.yPos+m.size/2)) < data.blockSize );
     if( m.xPos+data.playerHitBox/2 > xPos-data.blockSize/2
     &&  m.xPos-data.playerHitBox/2 < xPos+data.blockSize/2
     &&  m.yPos+data.playerHitBox/2 > yPos-data.blockSize/2

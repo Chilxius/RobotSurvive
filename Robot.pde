@@ -30,6 +30,8 @@ class Robot extends MovingThing
     yPos += ySpd;
     
     checkForScroll();
+    
+    checkForExit();
   }
   
   //Override
@@ -71,6 +73,12 @@ class Robot extends MovingThing
      
     if( xPos+data.xOffset > width-data.scrollXDist) //screen right
       data.xOffset -= xPos+data.xOffset - (width-data.scrollXDist);
+  }
+  
+  private void checkForExit()
+  {
+    if( dist( xPos, yPos, testMap.exitX, testMap.exitY ) < data.blockSize/2 )
+      testMap.exiting = true;
   }
   
   public void setPosition( float x, float y )

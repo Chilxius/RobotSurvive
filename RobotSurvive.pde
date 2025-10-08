@@ -6,18 +6,21 @@
 //LEVEL - (BLOCKS)
 //BADDIES - (BEHAVIOR,COSMETICS)
 
+//Get the robot and map un-coupled for end-of-level operations
+
 import processing.sound.*;
 
 Robot testBot;
 
 Map testMap;
+int testMapLevel = 1;
 
 StateManager manager = new StateManager();
 GameData data;// = new GameData();
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 
-PImage tile,wall,cap,grid,deco1;
+PImage tile,wall,cap,grid,decor[],exit;
 color dangerColor = color(0,0,200);
 
 void setup()
@@ -31,13 +34,13 @@ void setup()
   
   data = new GameData();
 
-  testMap = new Map(12);
+  testMap = new Map(1);
   
   //"test" and "ball"
   testBot = new Robot("test", this);
   testBot.xPos = testMap.startingPoint('x');
   testBot.yPos = testMap.startingPoint('y');
-  testBot.speed = 2;
+  testBot.speed = 3;
   testBot.angle = QUARTER_PI;
   testBot.angleSpeed = 0.02;
   testBot.xSpd = 1;
@@ -54,18 +57,53 @@ void setup()
   cap.resize(int(data.blockSize),0);
   grid = loadImage("doorGrid3.png");
   grid.resize(int(data.blockSize),0);
-  deco1 = loadImage("decor3.png");
-  deco1.resize(int(data.blockSize),0);
+  exit = loadImage("exit.png");
+  exit.resize(int(data.blockSize),0);
+  decor = new PImage[3];
+  decor[0] = loadImage("decor1.png");
+  decor[0].resize(int(data.blockSize),0);
+  decor[1] = loadImage("decor2.png");
+  decor[1].resize(int(data.blockSize),0);
+  decor[2] = loadImage("decor3.png");
+  decor[2].resize(int(data.blockSize),0);
+  //borders = new PImage[5];
+  //borders[0] = loadImage("wallBorderL.png");
+  //borders[0].resize(int(data.blockSize),0);
+  //borders[1] = loadImage("wallBorderD.png");
+  //borders[1].resize(int(data.blockSize),0);
+  //borders[2] = loadImage("wallBorderR.png");
+  //borders[2].resize(int(data.blockSize),0);
+  //borders[3] = loadImage("capBorderL.png");
+  //borders[3].resize(int(data.blockSize),0);
+  //borders[4] = loadImage("capBorderR.png");
+  //borders[4].resize(int(data.blockSize),0);
 
 }
 
 void draw()
 {
   background(0);
-  testMap.drawBlocks(testBot);
+  testMap.drawBlocks(testBot,false);
   testBot.show();
+  testMap.drawBlocks(testBot,true);
   
-  moveAllMovers();
+  if(testMap.exiting)
+    testMap.lowerExit();
+  else
+    moveAllMovers();
+    
+  if( testMap.fade >= 255 )
+  {
+    testMap = new Map(++testMapLevel);
+  
+    testBot.xPos = testMap.startingPoint('x');
+    testBot.yPos = testMap.startingPoint('y');
+    //testBot.speed = 3;
+    //testBot.angle = QUARTER_PI;
+    //testBot.angleSpeed = 0.02;
+    //testBot.xSpd = 1;
+    //testBot.ySpd = 0;
+  }
 }
 
 public void moveAllMovers()
