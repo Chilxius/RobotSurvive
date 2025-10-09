@@ -53,7 +53,7 @@ void setup()
   
   movers.add(testBot);
   
-  testEnemy = new Enemy( new ZombieBehavior(), testBot, 1 );
+  testEnemy = new Enemy( new GhostBehavior(), testBot, 1 );
   testEnemy.xPos = 500;
   testEnemy.yPos = 1300;
   

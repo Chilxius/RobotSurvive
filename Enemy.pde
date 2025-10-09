@@ -48,7 +48,7 @@ class Enemy extends MovingThing
   }
 }
 
-class EnemyBehavior
+abstract class EnemyBehavior
 {
   //Can move through walls
   boolean corporeal;

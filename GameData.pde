@@ -40,17 +40,17 @@ class GameData
     decor[0].resize(int(data.blockSize),0);
     decor[1] = loadImage("decor1.png");
     decor[1].resize(int(data.blockSize),0);
-    decor[2] = loadImage("decor2.png");
+    decor[2] = loadImage("decor2_2.png");
     decor[2].resize(int(data.blockSize),0);
     decor[3] = loadImage("decor3.png");
     decor[3].resize(int(data.blockSize),0);
     
     //Enemies
-    enemyImages.put("Ghost1", loadImage("ghost.png"));    enemyImages.get("Ghost1").resize(int(playerSize/2),0);
-    enemyImages.put("Ghost2", loadImage("ghost.png"));
-    enemyImages.put("GhostX", loadImage("ghostX.png"));
-    enemyImages.put("Zombie1", loadImage("zombie1.png"));
-    enemyImages.put("Zombie2", loadImage("zombie2.png"));
-    enemyImages.put("ZombieX", loadImage("zombieX.png"));
+    enemyImages.put("Ghost1",  loadImage("ghost.png"));   enemyImages.get("Ghost1").resize(int(enemyBaseSize),0);
+    enemyImages.put("Ghost2",  loadImage("ghost.png"));   enemyImages.get("Ghost2").resize(int(enemyBaseSize),0);
+    enemyImages.put("GhostX",  loadImage("ghostX.png"));  enemyImages.get("GhostX").resize(int(enemyBaseSize),0);
+    enemyImages.put("Zombie1", loadImage("zombie1.png")); enemyImages.get("Zombie1").resize(int(enemyBaseSize),0);
+    enemyImages.put("Zombie2", loadImage("zombie2.png")); enemyImages.get("Zombie2").resize(int(enemyBaseSize),0);
+    enemyImages.put("ZombieX", loadImage("zombieX.png")); enemyImages.get("ZombieX").resize(int(enemyBaseSize),0);
   }
 }
