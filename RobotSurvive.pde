@@ -115,7 +115,7 @@ public void loadImages()
   decor[0].resize(int(data.blockSize),0);
   decor[1] = loadImage("decor1.png");
   decor[1].resize(int(data.blockSize),0);
-  decor[2] = loadImage("decor2.png");
+  decor[2] = loadImage("decor2_2.png");
   decor[2].resize(int(data.blockSize),0);
   decor[3] = loadImage("decor3.png");
   decor[3].resize(int(data.blockSize),0);
