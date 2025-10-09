@@ -8,6 +8,7 @@
 
 //Get the robot and map un-coupled for end-of-level operations
 //Make Robot accelerate
+//Sort enemies in y-pos order to prevent higher enemies overlapping
 
 //Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 
@@ -18,12 +19,13 @@ Robot testBot;
 Map testMap;
 int testMapLevel = 1;
 
+Enemy testEnemy, testEnemy2;
+
 StateManager manager = new StateManager();
 GameData data;// = new GameData();
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front;
 color dangerColor = color(0,0,200);
 
 void setup()
@@ -51,9 +53,19 @@ void setup()
   
   movers.add(testBot);
   
-
+  testEnemy = new Enemy( new ZombieBehavior(), testBot, 1 );
+  testEnemy.xPos = 500;
+  testEnemy.yPos = 1300;
   
-  loadImages();
+  movers.add(testEnemy);
+  
+  testEnemy2 = new Enemy( new ZombieBehavior(), testBot, 1 );
+  testEnemy2.xPos = 500;
+  testEnemy2.yPos = 1200;
+  
+  movers.add(testEnemy2);
+  
+  data.loadImages();
 }
 
 void draw()
@@ -75,8 +87,10 @@ void draw()
   
     testBot.xPos = testMap.startingPoint('x');
     testBot.yPos = testMap.startingPoint('y');
-
   }
+  
+  testEnemy.show();
+  testEnemy2.show();
 }
 
 public void moveAllMovers()
@@ -84,41 +98,18 @@ public void moveAllMovers()
   for( MovingThing m: movers )
   {
     m.move();
+    
+    if( m instanceof Enemy )
+    {
+      Enemy e = (Enemy) m;
+      if( !e.behavior.corporeal )
+        continue;
+    }
+    
     Block b = testMap.intersectingBlock( m );
     if( b != null )
-    {
       m.bounce(b);
-    }
   }
-}
-
-public void loadImages()
-{
-  tile = loadImage("tile3.png");
-  tile.resize(0,int(data.blockSize));
-  wall = loadImage("wallLong9.png");
-  wall.resize(0,int(data.blockSize*1.25));
-  cap = loadImage("wallCap4.png");
-  cap.resize(int(data.blockSize),0);
-  grid = loadImage("doorGrid3.png");
-  grid.resize(int(data.blockSize),0);
-  exit = loadImage("exit.png");
-  exit.resize(int(data.blockSize),0);
-  girder = loadImage("girder2.png");
-  girder.resize(int(data.blockSize),0);
-  g_back = loadImage("girder_back.png");
-  g_back.resize(int(data.blockSize),0);
-  g_front = loadImage("girder_back.png");
-  g_front.resize(int(data.blockSize)*2,0);
-  decor = new PImage[4];
-  decor[0] = loadImage("decor0.png");
-  decor[0].resize(int(data.blockSize),0);
-  decor[1] = loadImage("decor1.png");
-  decor[1].resize(int(data.blockSize),0);
-  decor[2] = loadImage("decor2.png");
-  decor[2].resize(int(data.blockSize),0);
-  decor[3] = loadImage("decor3.png");
-  decor[3].resize(int(data.blockSize),0);
 }
 
 public void mousePressed()
