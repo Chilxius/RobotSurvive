@@ -6,6 +6,7 @@ public abstract class MovingThing
   float size;
   
   abstract public void move();
+  abstract public void show();
   
   public void bounce( Block b )
   {

@@ -7,12 +7,15 @@
 //BADDIES - (BEHAVIOR,COSMETICS)
 
 //Get the robot and map un-coupled for end-of-level operations
+//De-couple pointer's draw from its move
 //Make Robot accelerate
 //Sort enemies in y-pos order to prevent higher enemies overlapping
 
 //Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 
 import processing.sound.*;
+import java.util.Collections;
+import java.util.Comparator;
 
 Robot testBot;
 
@@ -53,15 +56,15 @@ void setup()
   
   movers.add(testBot);
   
-  testEnemy = new Enemy( new GhostBehavior(), testBot, 1 );
+  testEnemy = new Enemy( new RatBehavior(), testBot, 1 );
   testEnemy.xPos = 500;
   testEnemy.yPos = 1300;
   
   movers.add(testEnemy);
   
-  testEnemy2 = new Enemy( new ZombieBehavior(), testBot, 1 );
+  testEnemy2 = new Enemy( new BansheeBehavior(), testBot, 1 );
   testEnemy2.xPos = 500;
-  testEnemy2.yPos = 1200;
+  testEnemy2.yPos = 500;
   
   movers.add(testEnemy2);
   
@@ -73,7 +76,8 @@ void draw()
   background(0);
   testMap.drawBlocks(testBot,0);
   testMap.drawBlocks(testBot,1);
-  testBot.show();
+  //testBot.show();
+  showAllMovers();
   testMap.drawBlocks(testBot,2);
   
   if(testMap.exiting)
@@ -88,10 +92,52 @@ void draw()
     testBot.xPos = testMap.startingPoint('x');
     testBot.yPos = testMap.startingPoint('y');
   }
-  
-  testEnemy.show();
-  testEnemy2.show();
 }
+
+//Got help from ChatGPT - this shoud work unless there are thousands of objects
+public void showAllMovers()
+{
+  ArrayList<MovingThing> sorted = new ArrayList<MovingThing>(movers);
+  
+  // Make sure we're calling the method on the list itself
+  Collections.sort(sorted, new Comparator<MovingThing>() {
+    public int compare(MovingThing a, MovingThing b) {
+      return Float.compare(a.yPos, b.yPos);
+    }
+  });
+  
+  for (MovingThing o : sorted)
+    o.show();
+}
+
+//My less efficient version
+//public void showAllMovers()
+//{
+//  if(movers.size()==0) return;
+  
+//  ArrayList<MovingThing> sorted = new ArrayList<MovingThing>();
+  
+//  sorted.add( movers.get(0) );
+  
+//  for( MovingThing m: movers)
+//  {
+//    boolean placed = false;
+//    for(int i = 0; i < sorted.size(); i++)
+//    {
+//      if( m.yPos < sorted.get(i).yPos )
+//      {
+//        sorted.add(m);
+//        placed = true;
+//        break;
+//      }
+//    }
+//    if(!placed)
+//      sorted.add(m);
+//  }
+  
+//  for(MovingThing m: sorted)
+//    m.show();
+//}
 
 public void moveAllMovers()
 {

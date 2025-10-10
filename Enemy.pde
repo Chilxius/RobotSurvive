@@ -14,21 +14,54 @@ class Enemy extends MovingThing
     behavior = b;
     target = r;
     level = l;
+    if(behavior.boss)
+    {
+      loadEnemyImage(b, "1", data.bossBaseSize);
+      loadEnemyImage(b, "2", data.bossBaseSize);
+      loadEnemyImage(b, "x", data.bossBaseSize);
+    }
+    else
+    {
+      loadEnemyImage(b, "1", data.enemyBaseSize);
+      loadEnemyImage(b, "2", data.enemyBaseSize);
+      loadEnemyImage(b, "x", data.enemyBaseSize);
+    }
+  }
+  
+  //Load by name, only the first time it's needed
+  private void loadEnemyImage(EnemyBehavior b, String keySuffix, float resizeSize)
+  {
+    String key = b.name + keySuffix;
+    if (!enemyImages.containsKey(key))
+    {
+      PImage img = loadImage(key.toLowerCase() + ".png");
+      img.resize((int)resizeSize, 0);
+      enemyImages.put(key, img);
+    }
+  
+    PImage img = enemyImages.get(key);
+    if      (keySuffix.equals("1")) b.picture1 = img;
+    else if (keySuffix.equals("2")) b.picture2 = img;
+    else if (keySuffix.equals("x")) b.pictureX = img;
   }
   
   public void move()
   {
     if( dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.sightRange )
     {
-      if( target.xPos < xPos ) xSpd -= behavior.speedMultiplier*level;
-      else                     xSpd += behavior.speedMultiplier*level;
-      if( target.yPos < yPos ) ySpd -= behavior.speedMultiplier*level;
-      else                     ySpd += behavior.speedMultiplier*level;
+      //Shooters stop when they get close
+      if( !(behavior.ranged && dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.minRange ) )
+      {
+        if( target.xPos < xPos ) xSpd -= behavior.speedMultiplier*level;
+        else                     xSpd += behavior.speedMultiplier*level;
+        if( target.yPos < yPos ) ySpd -= behavior.speedMultiplier*level;
+        else                     ySpd += behavior.speedMultiplier*level;
+      }
     }
     
     xPos += xSpd;
     yPos += ySpd;
-    
+  
     xSpd *= behavior.friction;
     ySpd *= behavior.friction;
     
@@ -43,7 +76,7 @@ class Enemy extends MovingThing
     translate(xPos+data.xOffset,yPos+data.yOffset);
     if( target.xPos > xPos )
       scale(-1, 1);
-    image( enemyImages.get(behavior.name+behavior.step), 0, 0 );
+    image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
     pop();
   }
 }
@@ -61,12 +94,19 @@ abstract class EnemyBehavior
   
   //In blockSizes
   int sightRange;
+  int minRange; //for shooters
   
   String name;
   
   int step;
   int stepSpeed;
   int stepOffset;
+  
+  PImage picture1;
+  PImage picture2;
+  PImage pictureX;
+  
+  boolean boss;
 }
 
 class GhostBehavior extends EnemyBehavior
@@ -103,3 +143,63 @@ class ZombieBehavior extends EnemyBehavior
     name = "Zombie";
   }
 }
+
+class SkeletonBehavior extends EnemyBehavior
+{
+  SkeletonBehavior()
+  {
+    corporeal = true;
+    ranged = false;
+    speedMultiplier = 0.010;
+    friction = 0.90;
+    sightRange = 7;
+    
+    step = 1;
+    stepSpeed = 1000;
+    stepOffset = int(random(stepSpeed));
+    
+    name = "Skeleton";
+  }
+}
+
+class RatBehavior extends EnemyBehavior
+{
+  RatBehavior()
+  {
+    corporeal = true;
+    ranged = false;
+    speedMultiplier = 0.020;
+    friction = 0.95;
+    sightRange = 7;
+    
+    step = 1;
+    stepSpeed = 1000;
+    stepOffset = int(random(stepSpeed));
+    
+    name = "Rat";
+  }
+}
+
+class BansheeBehavior extends EnemyBehavior
+{
+  BansheeBehavior()
+  {
+    boss = true;
+    corporeal = true;
+    ranged = false;
+    speedMultiplier = 0.010;
+    friction = 0.95;
+    sightRange = 7;
+    
+    step = 1;
+    stepSpeed = 2000;
+    stepOffset = int(random(stepSpeed));
+    
+    name = "Banshee";
+  }
+}
+
+/*
+Ghost, Zombie, Skeleton, Rats, Mummy, Ghoul, Vampire, Wraith
+Banshee, Dino Skeleton, Brain in a Jar, Lich, Vampire Mage
+*/

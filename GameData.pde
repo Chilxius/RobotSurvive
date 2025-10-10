@@ -13,6 +13,7 @@ class GameData
   float scrollYDist = height/3;
   
   float enemyBaseSize = 75;
+  float bossBaseSize = 150;
 
   public void loadImages()
   {
@@ -45,12 +46,5 @@ class GameData
     decor[3] = loadImage("decor3.png");
     decor[3].resize(int(data.blockSize),0);
     
-    //Enemies
-    enemyImages.put("Ghost1",  loadImage("ghost.png"));   enemyImages.get("Ghost1").resize(int(enemyBaseSize),0);
-    enemyImages.put("Ghost2",  loadImage("ghost.png"));   enemyImages.get("Ghost2").resize(int(enemyBaseSize),0);
-    enemyImages.put("GhostX",  loadImage("ghostX.png"));  enemyImages.get("GhostX").resize(int(enemyBaseSize),0);
-    enemyImages.put("Zombie1", loadImage("zombie1.png")); enemyImages.get("Zombie1").resize(int(enemyBaseSize),0);
-    enemyImages.put("Zombie2", loadImage("zombie2.png")); enemyImages.get("Zombie2").resize(int(enemyBaseSize),0);
-    enemyImages.put("ZombieX", loadImage("zombieX.png")); enemyImages.get("ZombieX").resize(int(enemyBaseSize),0);
   }
 }
