@@ -6,7 +6,9 @@ interface GameState
   void goToBreakdown(StateManager manager);
   
   void display();
-  void reactToButton();
+  
+  void reactToPress();
+  void reactToRelease();
 }
 
 class MenuState implements GameState
@@ -32,7 +34,11 @@ class MenuState implements GameState
   {
   }
   
-  void reactToButton()
+  void reactToPress()
+  {
+  }
+  
+  void reactToRelease()
   {
   }
 }
@@ -58,10 +64,35 @@ class SurvivalState implements GameState
   
   void display()
   {
+    background(0);
+    
+    testMap.drawBlocks(testBot,0);
+    testMap.drawBlocks(testBot,1);
+    showAllMovers();
+    testMap.drawBlocks(testBot,2);
+    
+    if(testMap.exiting)
+      testMap.lowerExit();
+    else
+      moveAllMovers();
+      
+    if( testMap.fade >= 255 )
+    {
+      testMap = new Map(++testMapLevel);
+    
+      testBot.xPos = testMap.startingPoint('x');
+      testBot.yPos = testMap.startingPoint('y');
+    }
   }
   
-  void reactToButton()
+  void reactToPress()
   {
+    testBot.startTurning();
+  }
+  
+  void reactToRelease()
+  {
+    testBot.stopTurning();
   }
 }
 
@@ -88,7 +119,11 @@ class UpgradeState implements GameState
   {
   }
   
-  void reactToButton()
+  void reactToPress()
+  {
+  }
+  
+  void reactToRelease()
   {
   }
 }
@@ -116,7 +151,11 @@ class BreakdownState implements GameState
   {
   }
   
-  void reactToButton()
+  void reactToPress()
+  {
+  }
+  
+  void reactToRelease()
   {
   }
 }
@@ -133,6 +172,21 @@ class StateManager
   public void setState(GameState state)
   {
     this.state = state;
+  }
+  
+  public void display()
+  {
+    state.display();
+  }
+  
+  public void reactToPress()
+  {
+    state.reactToPress();
+  }
+  
+  public void reactToRelease()
+  {
+    state.reactToRelease();
   }
   
   void goToMenu()

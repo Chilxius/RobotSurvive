@@ -5,6 +5,10 @@ class Enemy extends MovingThing
 {
   int level;
   
+  float health;
+  boolean dead;
+  float opacity; //for fading out once dead
+  
   EnemyBehavior behavior;
   
   Robot target;
@@ -14,6 +18,11 @@ class Enemy extends MovingThing
     behavior = b;
     target = r;
     level = l;
+    
+    //health = behavior.maxHealth;
+    dead = false;
+    opacity = 255;
+    
     if(behavior.boss)
     {
       loadEnemyImage(b, "1", data.bossBaseSize);
@@ -49,8 +58,8 @@ class Enemy extends MovingThing
   {
     if( dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.sightRange )
     {
-      //Shooters stop when they get close
-      if( !(behavior.ranged && dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.minRange ) )
+      //Shooters stop when they get close, all enemies stop accelerating when dead
+      if( !(behavior.ranged && dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.minRange ) && !dead )
       {
         if( target.xPos < xPos ) xSpd -= behavior.speedMultiplier*level;
         else                     xSpd += behavior.speedMultiplier*level;
@@ -76,7 +85,13 @@ class Enemy extends MovingThing
     translate(xPos+data.xOffset,yPos+data.yOffset);
     if( target.xPos > xPos )
       scale(-1, 1);
-    image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
+    if( dead )
+    {
+      tint(255,opacity-=2);
+      image(behavior.pictureX, 0, 0);
+    }
+    else
+      image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
     pop();
   }
 }
@@ -113,7 +128,7 @@ class GhostBehavior extends EnemyBehavior
 {
   GhostBehavior()
   {
-    corporeal = false;
+    corporeal = true;
     ranged = false;
     speedMultiplier = 0.005;
     friction = 0.99;
@@ -187,7 +202,7 @@ class BansheeBehavior extends EnemyBehavior
     boss = true;
     corporeal = true;
     ranged = false;
-    speedMultiplier = 0.010;
+    speedMultiplier = 0.020;
     friction = 0.95;
     sightRange = 7;
     

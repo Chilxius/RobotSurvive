@@ -1,3 +1,5 @@
+//Tried acceleration with Robot, caused it to glitch into walls
+
 class Robot extends MovingThing
 {
   CosmeticKit cosmetics;
@@ -9,6 +11,8 @@ class Robot extends MovingThing
   
   boolean turning;
   boolean turningClockwise;
+  
+  int cash;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -33,8 +37,14 @@ class Robot extends MovingThing
     
     adjustToAngle();
     
+    //xSpd += xAcc;
+    //ySpd += yAcc;
+    
     xPos += xSpd;
     yPos += ySpd;
+    
+    //xSpd *= .95;
+    //ySpd *= .95;
     
     checkForScroll();
     

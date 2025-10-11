@@ -8,8 +8,6 @@
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
-//Make Robot accelerate
-//Sort enemies in y-pos order to prevent higher enemies overlapping
 
 //Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 
@@ -31,6 +29,7 @@ ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 
 color dangerColor = color(0,0,200);
 
+
 void setup()
 {
   //size(1200, 800);
@@ -41,6 +40,8 @@ void setup()
   frameRate(120);
   
   data = new GameData();
+  
+  manager.setState( new SurvivalState() );
 
   testMap = new Map(1);
   
@@ -48,7 +49,7 @@ void setup()
   testBot = new Robot("test", this);
   testBot.xPos = testMap.startingPoint('x');
   testBot.yPos = testMap.startingPoint('y');
-  testBot.speed = 2.5;
+  testBot.speed = 2;
   testBot.angle = QUARTER_PI;
   testBot.angleSpeed = 0.02;
   testBot.xSpd = 1;
@@ -56,15 +57,15 @@ void setup()
   
   movers.add(testBot);
   
-  testEnemy = new Enemy( new RatBehavior(), testBot, 1 );
+  testEnemy = new Enemy( new GhostBehavior(), testBot, 1 );
   testEnemy.xPos = 500;
   testEnemy.yPos = 1300;
   
   movers.add(testEnemy);
   
-  testEnemy2 = new Enemy( new BansheeBehavior(), testBot, 1 );
+  testEnemy2 = new Enemy( new ZombieBehavior(), testBot, 1 );
   testEnemy2.xPos = 500;
-  testEnemy2.yPos = 500;
+  testEnemy2.yPos = 900;
   
   movers.add(testEnemy2);
   
@@ -73,25 +74,7 @@ void setup()
 
 void draw()
 {
-  background(0);
-  testMap.drawBlocks(testBot,0);
-  testMap.drawBlocks(testBot,1);
-  //testBot.show();
-  showAllMovers();
-  testMap.drawBlocks(testBot,2);
-  
-  if(testMap.exiting)
-    testMap.lowerExit();
-  else
-    moveAllMovers();
-    
-  if( testMap.fade >= 255 )
-  {
-    testMap = new Map(++testMapLevel);
-  
-    testBot.xPos = testMap.startingPoint('x');
-    testBot.yPos = testMap.startingPoint('y');
-  }
+  manager.display();
 }
 
 //Got help from ChatGPT - this shoud work unless there are thousands of objects
@@ -109,35 +92,6 @@ public void showAllMovers()
   for (MovingThing o : sorted)
     o.show();
 }
-
-//My less efficient version
-//public void showAllMovers()
-//{
-//  if(movers.size()==0) return;
-  
-//  ArrayList<MovingThing> sorted = new ArrayList<MovingThing>();
-  
-//  sorted.add( movers.get(0) );
-  
-//  for( MovingThing m: movers)
-//  {
-//    boolean placed = false;
-//    for(int i = 0; i < sorted.size(); i++)
-//    {
-//      if( m.yPos < sorted.get(i).yPos )
-//      {
-//        sorted.add(m);
-//        placed = true;
-//        break;
-//      }
-//    }
-//    if(!placed)
-//      sorted.add(m);
-//  }
-  
-//  for(MovingThing m: sorted)
-//    m.show();
-//}
 
 public void moveAllMovers()
 {
@@ -158,29 +112,16 @@ public void moveAllMovers()
   }
 }
 
-public void mousePressed()
-{
-  keyPressed();
-  //testBot.cosmetics.sounds.move();
-  //testBot.cosmetics = new TestDecorator( testBot.cosmetics );
-}
+public void mousePressed(){keyPressed();}
 
-public void mouseReleased()
-{
-  keyReleased();
-  //testBot.cosmetics.sounds.hurt();
-}
+public void mouseReleased(){keyReleased();}
 
 public void keyPressed()
 {
-  //testBot.cosmetics.sounds.levelUp();
-  testBot.startTurning();
-  
-  //if( key == ' ' )
-  //  dangerColor = color(200,0,0);
+  manager.reactToPress();
 }
 
 public void keyReleased()
 {
-  testBot.stopTurning();
+  manager.reactToRelease();
 }
