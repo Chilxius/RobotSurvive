@@ -8,6 +8,7 @@
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
+//Get images centered on wheel chunks
 
 //Improvement: change laser to spinning lasers that show direciton - still need a vector indicator
 
@@ -29,6 +30,7 @@ ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 
 color dangerColor = color(0,0,200);
 
+ChoiceWheel testWheel;
 
 void setup()
 {
@@ -41,7 +43,7 @@ void setup()
   
   data = new GameData();
   
-  manager.setState( new SurvivalState() );
+  manager.setState( new MenuState() );
 
   testMap = new Map(1);
   
@@ -69,11 +71,22 @@ void setup()
   
   movers.add(testEnemy2);
   
+  testWheel = new ChoiceWheel( testBot, width/2, height/2, height*0.7 );
+  testWheel.addUpgrade( new Upgrade() );
+  testWheel.segments.get(0).image = loadImage("testFace2.png");
+  testWheel.addUpgrade( new Upgrade() );
+  testWheel.addUpgrade( new Upgrade() );
+  testWheel.segments.get(2).image = loadImage("testFace2.png");
+  testWheel.addUpgrade( new Upgrade() );
+  //testWheel.addUpgrade( new Upgrade() );
+  //testWheel.addUpgrade( new Upgrade() );
+  
   data.loadImages();
 }
 
 void draw()
 {
+  background(0);
   manager.display();
 }
 

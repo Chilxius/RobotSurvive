@@ -32,14 +32,18 @@ class MenuState implements GameState
   
   void display()
   {
+    testWheel.show();
+    testWheel.spin();
   }
   
   void reactToPress()
   {
+    testWheel.pressReact(true);
   }
   
   void reactToRelease()
   {
+    testWheel.pressReact(false);
   }
 }
 
