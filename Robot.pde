@@ -4,6 +4,9 @@ class Robot extends MovingThing
 {
   CosmeticKit cosmetics;
   
+  String fullName;
+  String shortName;
+  
   float angle;
   float angleSpeed;
   
@@ -20,6 +23,16 @@ class Robot extends MovingThing
   {
     cosmetics = new CosmeticKit( name, parent );
     size = data.playerSize;
+    
+    shortName = generateName(1);
+    fullName = shortName + generateName(2);
+    
+    //TESTING
+    println( shortName + " " + fullName );
+    
+    //TESTING
+    for(int i = 0; i < 200; i++)
+      println(generateName(1) + generateName(2));
   }
   
   public void show()
@@ -176,6 +189,55 @@ class Robot extends MovingThing
         pointer.remove(i);
         i--;
       }
+    }
+  }
+  
+  private String generateName( int part )
+  {
+    String result = "";
+
+    if( part == 1 )
+    {
+      if( int(random(100)) == 13 ) return "Mango";
+      
+      
+      String [] firstHalf = {"Robo","Auto","Laser","Metal","Proto","Mega","Super","Heavy","Gizmo","Cyber","Alpha","Omega","Techno","Max","Ultra","Alloy","Kilo","Artifice","Mighty","Astro","Micro","Power","Armor","Virus"};
+      String [] secondHalf = {"Matic","Tron","Bot","Machine","Type","Device","Gadget","Droid","Mech","Storm","-Kun","-Chan","Enforcer","Gear","Tool","Byte","Shock","Thing","Rex","bit"};
+      
+      result += firstHalf[int(random(firstHalf.length))];
+      result += secondHalf[int(random(secondHalf.length))];
+      return result;
+    }
+    else
+    {
+      if( random(2) > 1 && !shortName.equals("Mango") )
+        result += ""+ numericPart();
+  
+      return result;
+    }
+  }
+  
+  private String numericPart()
+  {
+    switch(int(random(4)))
+    {
+      //Just a number
+      case 0:
+        return " " + int(random(1,10));
+      
+      //Number with abbreviation
+      case 1:
+        String suffix[] = {"mk.","No.","#","ver."};
+        return " " + suffix[int(random(suffix.length))]+int(random(1,10));
+      
+      //Extra Word (not numeric, I know)
+      case 2:
+        String suffix2[] = {" Special"," Advanced","Pro"," [Experimental]"," [Unstable]"," MAX","Plus","-X"};
+        return "" + suffix2[int(random(suffix2.length))];
+      
+      //Big number (100 to 9000)
+      default:
+       return " " + int( int(random(1,10)) * pow(10, int(random(2,4))) );
     }
   }
 }

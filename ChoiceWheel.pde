@@ -1,3 +1,5 @@
+//Icons still wrong on wheel with differnet numbers of wedges
+
 class ChoiceWheel
 {
   ArrayList<Upgrade> segments = new ArrayList<Upgrade>();
@@ -57,7 +59,10 @@ class ChoiceWheel
       push();
       
       translate(0,wheelSize/3);
-      rotate(HALF_PI);
+      
+      //Un-roatate so image is upright
+      rotate(-angle-size*i+QUARTER_PI);
+      
       image(segments.get(i).image,0,0);
       
       pop(); //un-twist
@@ -89,7 +94,7 @@ class ChoiceWheel
       //Wheel is slowing down
       case SLOWING:
         angle += spinSpeed;
-        spinSpeed *= 0.999;
+        spinSpeed *= 0.995;
         break;
         
       //Wheel is being "grabbed", slowing it faster
@@ -193,26 +198,3 @@ public enum WheelState
 {
   START, SPINNING, SLOWING, GRABBED, STOPPED
 }
-
-class Upgrade
-{
-  //TESTING
-  color segmentColor = color( random(255), random(255), random(255) );
-  
-  String name = "";
-  
-  PImage image = loadImage("testFace.png");
-  
-  Upgrade nextUpgrade;
-  boolean taken;
-}
-
-class RootUpgrade
-{
-  
-}
-
-//More money = better upgrades
-//If not enough cash, will include more copies of cheeper upgrades
-//If can't aford anything, will put empty slot on wheel or skip wheel
-//Cash will only be "spent" on selected upgrade

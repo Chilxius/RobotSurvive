@@ -40,10 +40,15 @@ void setup()
   imageMode(CENTER);
   noSmooth();
   frameRate(120);
+  textAlign(CENTER);
+  
+  //textFont( createFont("SFTransRobotics.ttf", 128) ); //Title - ROBOT
+  textFont( createFont("October Crow.ttf", 128) ); //Title - VAMPIRE
+  //textFont( createFont("OCR-a___.ttf", 128) ); //Normal Font
   
   data = new GameData();
   
-  manager.setState( new MenuState() );
+  manager.setState( new SurvivalState() );
 
   testMap = new Map(1);
   
@@ -73,10 +78,10 @@ void setup()
   
   testWheel = new ChoiceWheel( testBot, width/2, height/2, height*0.7 );
   testWheel.addUpgrade( new Upgrade() );
-  testWheel.segments.get(0).image = loadImage("testFace2.png");
+  //testWheel.segments.get(0).image = loadImage("testFace2.png");
   testWheel.addUpgrade( new Upgrade() );
   testWheel.addUpgrade( new Upgrade() );
-  testWheel.segments.get(2).image = loadImage("testFace2.png");
+  //testWheel.segments.get(2).image = loadImage("testFace2.png");
   testWheel.addUpgrade( new Upgrade() );
   //testWheel.addUpgrade( new Upgrade() );
   //testWheel.addUpgrade( new Upgrade() );
@@ -88,6 +93,26 @@ void draw()
 {
   background(0);
   manager.display();
+  
+  ////TESTING TITLE SPLASH
+  //background(200);
+  
+  //fill(50,100,50);
+  //textFont( createFont("TechnoBoard-519Ej.ttf", 128) ); //Title - ROBOT
+  //textSize(180);
+  //text("ROBOTS",width/2,height/3+50);
+  
+  //fill(0);
+  //textFont( createFont("Javanese Text", 128) );
+  //textSize(75);
+  //text("vs",width/2,height/2-30);
+  
+  //fill(100,0,0);
+  //textFont( createFont("October Crow.ttf", 128) ); //Title - VAMPIRE
+  //textSize(175);
+  //translate(width/2+25,height*2.0/3-25);
+  //rotate(-0.2);
+  //text("VAMPIRES",0,0);
 }
 
 //Got help from ChatGPT - this shoud work unless there are thousands of objects
