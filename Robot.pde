@@ -3,12 +3,16 @@
 class Robot extends MovingThing
 {
   CosmeticKit cosmetics;
+  //TurnGuide guide;
+  
+  HashMap<String,Boolean> upgrades = new HashMap<>();
   
   String fullName;
   String shortName;
   
   float angle;
   float angleSpeed;
+  float discAngle = QUARTER_PI; //for alternating disc directions
   
   float speed;
   
@@ -19,20 +23,26 @@ class Robot extends MovingThing
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
+  int armor; //health
+  
   public Robot( String name, PApplet parent )
   {
     cosmetics = new CosmeticKit( name, parent );
     size = data.playerSize;
     
+    //guide = new TurnGuide(100,height-100,this);
+    
     shortName = generateName(1);
     fullName = shortName + generateName(2);
     
-    //TESTING
-    println( shortName + " " + fullName );
+    armor = 20;
     
-    //TESTING
-    for(int i = 0; i < 200; i++)
-      println(generateName(1) + generateName(2));
+    ////TESTING
+    //println( shortName + " " + fullName );
+    
+    ////TESTING
+    //for(int i = 0; i < 200; i++)
+    //  println(generateName(1) + generateName(2));
   }
   
   public void show()
@@ -62,6 +72,11 @@ class Robot extends MovingThing
     checkForScroll();
     
     checkForExit();
+  }
+  
+  public boolean checkExpiration()
+  {
+    return false;
   }
   
   //Override
@@ -117,47 +132,40 @@ class Robot extends MovingThing
     yPos = y;
   }
   
+  public int getMaxArmor()
+  {
+    if( upgrades.get("Armor Up 3") ) return 100;
+    if( upgrades.get("Armor Up 2") ) return 70;
+    if( upgrades.get("Armor Up 1") ) return 40;
+    return 20;
+  }
+  
+  private float adjustedSpeed()
+  {
+    if(upgrades.get("Movement Speed 4")) return 3.75;
+    if(upgrades.get("Movement Speed 3")) return 3;
+    if(upgrades.get("Movement Speed 2")) return 2.25;
+    if(upgrades.get("Movement Speed 1")) return 1.5;
+    return 1;
+  }
+  
+  private float adjustedAngleSpeed()
+  {
+    if(upgrades.get("Rotation Speed 3")) return 0.03;
+    if(upgrades.get("Rotation Speed 2")) return 0.025;
+    if(upgrades.get("Rotation Speed 1")) return 0.02;
+    return 0.015;
+  }
+  
   private void adjustToAngle()
   {
     if(!turning) return;
     
-    if(turningClockwise) angle+=angleSpeed;
-    else                 angle-=angleSpeed;
+    if(turningClockwise) angle+=adjustedAngleSpeed();
+    else                 angle-=adjustedAngleSpeed();
     
-    xSpd = cos(angle) * speed;
-    ySpd = sin(angle) * speed;
-
-  }
-  
-  //Make this an ellipse
-  private void showDirectionDisplay()
-  {
-    push();
-    translate(xPos+data.xOffset, yPos+data.yOffset+data.playerHitBox*.75);
-    rotate(angle);
-    //strokeWeight(5);
-    //line(0,0,75,0);
-    //if(turningClockwise)
-    //  triangle(75,0, 65,0, 70,10);
-    //else
-    //  triangle(75,0, 65,0, 70,-10);
-    noStroke();
-    color lightColor;
-    if(turningClockwise) lightColor = color(200,0,0);
-    else lightColor = color(0,0,200);
-    fill(lightColor);
-    circle(75,0,10);
-    if(turning)
-    {
-      fill(lightColor,75);
-      for(int i = 0; i < 10; i++)
-      {
-        if(turningClockwise) rotate(-0.05);
-        if(!turningClockwise)rotate(0.05);
-        circle(75,0,10-i);
-      }
-    }
-    pop();
+    xSpd = cos(angle) * adjustedSpeed();
+    ySpd = sin(angle) * adjustedSpeed();
   }
   
   public void startTurning()
@@ -239,6 +247,80 @@ class Robot extends MovingThing
       default:
        return " " + int( int(random(1,10)) * pow(10, int(random(2,4))) );
     }
+  }
+  
+  public void activateUpgrade( String name )
+  {
+    if( upgrades.get(name) )
+    {
+      println("Tried to activated " + name + " when it was already active.");
+      return;
+    }
+    
+    //Deactivate previous tiers
+    switch(name)
+    {
+      case "Movement Speed 4": upgrades.put("Movement Speed 3",false);
+      case "Movement Speed 3": upgrades.put("Movement Speed 2",false);
+      case "Movement Speed 2": upgrades.put("Movement Speed 1",false);
+      break;
+      case "Forceful Pushback":upgrades.put("Pushback",false);
+      case "Pushback":         upgrades.put("Knockback Resist",false);
+      break;
+      case "Rotation Speed 3": upgrades.put("Rotation Speed 2",false);
+      case "Rotation Speed 2": upgrades.put("Rotation Speed 1",false);
+      break;
+      case "Turn-Stop": upgrades.put("Turn-Slow",false);
+      break;
+      case "Armor Up 3": upgrades.put("Armor Up 2",false);
+      case "Armor Up 2": upgrades.put("Armor Up 1",false);
+      break;
+      case "Shield 3": upgrades.put("Shield 2",false);
+      case "Shield 2": upgrades.put("Shield 1",false);
+      break;
+      case "Magnet 2": upgrades.put("Magnet 1",false);
+      break;
+      case "Laser 4": upgrades.put("Laser 3",false);
+      case "Laser 3": upgrades.put("Laser 2",false);
+      case "Laser 2": upgrades.put("Laser 1",false);
+      break;
+      case "Extended Laser 2": upgrades.put("Extended Laser 1",false);
+      break;
+      case "Wide Laser 2": upgrades.put("Wide Laser 1",false);
+      break;
+      case "Missile 4": upgrades.put("Missile 3",false);
+      case "Missile 3": upgrades.put("Missile 2",false);
+      case "Missile 2": upgrades.put("Missile 1",false);
+      break;
+      case "Missile Reload 2": upgrades.put("Missile Reload 1",false);
+      break;
+      case "Multi-Launch 2": upgrades.put("Multi-Launch 1",false);
+      break;
+      case "Blast Radius 2": upgrades.put("Missile Reload 1",false);
+      break;
+      case "Razor Disc 4": upgrades.put("Razor Disc 3",false);
+      case "Razor Disc 3": upgrades.put("Razor Disc 2",false);
+      case "Razor Disc 2": upgrades.put("Razor Disc 1",false);
+      break;
+      case "Multi-Disc 3": upgrades.put("Multi-Disc 2",false);
+      case "Multi-Disc 2": upgrades.put("Multi-Disc 1",false);
+      break;
+      case "Disc Bounce 3": upgrades.put("Disc Bounce 2",false);
+      case "Disc Bounce 2": upgrades.put("Disc Bounce 1",false);
+      break;
+      case "Electric Shock 4": upgrades.put("Electric Shock 3",false);
+      case "Electric Shock 3": upgrades.put("Electric Shock 2",false);
+      case "Electric Shock 2": upgrades.put("Electric Shock 1",false);
+      break;
+      case "Shock Speed 2": upgrades.put("Shock Speed 1",false);
+      break;
+      case "Long Arc 3": upgrades.put("Long Arc 2",false);
+      case "Long Arc 2": upgrades.put("Long Arc 1",false);
+      break;
+    }
+    
+    //Activated upgrade
+    upgrades.put(name,true);
   }
 }
 

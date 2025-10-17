@@ -434,7 +434,7 @@ class Map
     chunkGrid[mapSize-1][0].blockGrid[4][3].yPos++;
     chunkGrid[mapSize-1][0].blockGrid[4][4].yPos++;
 
-    testBot.yPos++;
+    robot.yPos++;
     
     fade+= 255/data.blockSize;
     

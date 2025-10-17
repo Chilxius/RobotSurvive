@@ -70,33 +70,41 @@ class SurvivalState implements GameState
   {
     background(0);
     
-    testMap.drawBlocks(testBot,0);
-    testMap.drawBlocks(testBot,1);
+    testMap.drawBlocks(robot,0);
+    testMap.drawBlocks(robot,1);
     showAllMovers();
-    testMap.drawBlocks(testBot,2);
+    testMap.drawBlocks(robot,2);
     
     if(testMap.exiting)
       testMap.lowerExit();
     else
+    {
       moveAllMovers();
-      
+      checkMoversForRemoval();
+      //robot.guide.display(); 
+    }
+    
     if( testMap.fade >= 255 )
     {
       testMap = new Map(++testMapLevel);
+      
+      manager.setState( new UpgradeState() );
     
-      testBot.xPos = testMap.startingPoint('x');
-      testBot.yPos = testMap.startingPoint('y');
+      robot.xPos = testMap.startingPoint('x');
+      robot.yPos = testMap.startingPoint('y');
     }
+    
+    hud.display(false);
   }
   
   void reactToPress()
   {
-    testBot.startTurning();
+    robot.startTurning();
   }
   
   void reactToRelease()
   {
-    testBot.stopTurning();
+    robot.stopTurning();
   }
 }
 
@@ -121,14 +129,21 @@ class UpgradeState implements GameState
   
   void display()
   {
+    testWheel.show();
+    testWheel.spin();
+    hud.display(true);
+    if( robot.armor < robot.getMaxArmor() )
+      robot.armor++;
   }
   
   void reactToPress()
   {
+    testWheel.pressReact(true);
   }
   
   void reactToRelease()
   {
+    testWheel.pressReact(false);
   }
 }
 

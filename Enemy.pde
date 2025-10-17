@@ -25,12 +25,14 @@ class Enemy extends MovingThing
     
     if(behavior.boss)
     {
+      size = data.bossBaseSize;
       loadEnemyImage(b, "1", data.bossBaseSize);
       loadEnemyImage(b, "2", data.bossBaseSize);
       loadEnemyImage(b, "x", data.bossBaseSize);
     }
     else
     {
+      size = data.enemyBaseSize;
       loadEnemyImage(b, "1", data.enemyBaseSize);
       loadEnemyImage(b, "2", data.enemyBaseSize);
       loadEnemyImage(b, "x", data.enemyBaseSize);
@@ -82,17 +84,25 @@ class Enemy extends MovingThing
   public void show()
   {
     push();
+    
     translate(xPos+data.xOffset,yPos+data.yOffset);
     if( target.xPos > xPos )
       scale(-1, 1);
-    if( dead )
-    {
-      tint(255,opacity-=2);
-      image(behavior.pictureX, 0, 0);
-    }
-    else
-      image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
+
+    image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
+    
     pop();
+  }
+  
+  public boolean checkExpiration()
+  {
+    if(dead)
+    {
+      finished = true;
+      new Remnant(this);
+      return true;
+    }
+    return false;
   }
 }
 
@@ -128,7 +138,7 @@ class GhostBehavior extends EnemyBehavior
 {
   GhostBehavior()
   {
-    corporeal = true;
+    corporeal = false;
     ranged = false;
     speedMultiplier = 0.005;
     friction = 0.99;

@@ -43,12 +43,13 @@ class ChoiceWheel
     //int index = int(((angle % TWO_PI) / size) % segments.size());
     //int index = int(((TWO_PI - (angle % TWO_PI)) / size) % segments.size());
     
-    background( segments.get( int(((TWO_PI - (angle % TWO_PI)) / size) % segments.size()) ).segmentColor );
+    //background( segments.get( int(((TWO_PI - (angle % TWO_PI)) / size) % segments.size()) ).segmentColor );
       
     for(int i = 0; i < chunks; i++)
     {
       fill(segments.get(i).segmentColor);
-      arc( 0, 0, wheelSize, wheelSize, 0, size+0 );
+      stroke(150,150,150); strokeWeight(5);
+      arc( 0, 0, wheelSize, wheelSize, 0, size+0, PIE );
       
       //Rotate back to get image in place
       push();
@@ -58,7 +59,7 @@ class ChoiceWheel
       //Re-orient image
       push();
       
-      translate(0,wheelSize/3);
+      translate(0,wheelSize/3.5);
       
       //Un-roatate so image is upright
       rotate(-angle-size*i+QUARTER_PI);
@@ -72,12 +73,6 @@ class ChoiceWheel
     }
     
     pop();
-    
-    for( int i = 0; i < segments.size(); i++ )
-    {
-      fill( segments.get(i).segmentColor );
-      circle(100,100+150*i,50);
-    }
     
     clicker.handleClicker();
   }

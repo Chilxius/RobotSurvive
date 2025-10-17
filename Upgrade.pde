@@ -1,68 +1,138 @@
 class Upgrade
 {
   //TESTING
-  color segmentColor = color( random(255), random(255), random(255) );
+  color segmentColor;// = color( random(255), random(255), random(255) );
   
   String name = "";
   
   PImage image;// = chooseImage();
   
-  Upgrade nextUpgrade;
+  //Upgrade nextUpgrade; //This should be handled by the tree
   boolean taken;
+  
+  UpgradeCategory category;
 
-  Upgrade()
+  Upgrade( String name )
   {
-    image = chooseImage();
-    image.resize(150,0);
+    this.name = name;
+    image = upgradeImages.get(this.name);
+    category = categoryByName(name);
+    segmentColor = colorByCategory(category);
   }
-
-  //FOR TESTING
-  private PImage chooseImage()
+}
+  
+public color colorByCategory(UpgradeCategory category)
+{
+  switch(category)
   {
-    switch( int( random( 34 ) ) )
-    {
-      case 0:  return loadImage("greenFoot.png");
-      case 1:  return loadImage("yellowFoot.png");
-      case 2:  return loadImage("redFoot.png");
-      case 3:  return loadImage("purpleFoot.png");
-      case 4:  return loadImage("greenArrow.png");
-      case 5:  return loadImage("turnStop.png");
-      case 6:  return loadImage("rotate.png");
-      case 7:  return loadImage("turnSlow.png");
-      case 8:  return loadImage("twoArrows.png");
-      case 9:  return loadImage("threeArrows.png");
-      case 10: return loadImage("fourArrows.png");
-      case 11: return loadImage("fushaFoot.png");
-      case 12: return loadImage("rotate2.png");
-      case 13: return loadImage("rotate3.png");
-      case 14: return loadImage("tool.png");
-      case 15: return loadImage("tools2.png");
-      case 16: return loadImage("tools3.png");
-      case 17: return loadImage("regen.png");
-      case 18: return loadImage("magnet.png");
-      case 19: return loadImage("magnet.png");
-      case 20: return loadImage("shieldRegen.png");
-      case 21: return loadImage("shield2.png");
-      case 22: return loadImage("shield3.png");
-      case 23: return loadImage("laser1.png");
-      case 24: return loadImage("laser2.png");
-      case 25: return loadImage("laser3.png");
-      case 26: return loadImage("laser4.png");
-      case 27: return loadImage("laserBounce.png");
-      case 28: return loadImage("tunnel.png");
-      case 29: return loadImage("pierce.png");
-      case 30: return loadImage("laserWidth.png");
-      case 31: return loadImage("laserWidth2.png");
-      case 32: return loadImage("laserRange.png");
-      case 33: return loadImage("laserRange2.png");
-      default: return loadImage("shield.png");
-    }
+    case MOVEMENT: return color(200,200,0);
+    case DEFENSE:  return color(0,0,100);
+    case LASER:    return color(0,100,0);
+    case MISSILE:  return color(100,100,100);
+    case DISC:     return color(100,0,0);
+    case ELECTRIC: return color(200,200,0);
+    
+    default: return color(255);
+  }
+}
+
+
+
+public UpgradeCategory categoryByName( String name )
+{
+  switch(name)
+  {
+    case "Movement Speed 1":
+    case "Movement Speed 2":
+    case "Movement Speed 3":
+    case "Movement Speed 4":
+    case "Knockback Resist":
+    case "Pushback":
+    case "Forceful Pushback":
+    case "Rotation Speed 1":
+    case "Rotation Speed 2":
+    case "Rotation Speed 3":
+    case "Turn-Slow":
+    case "Turn-Stop":
+      return UpgradeCategory.MOVEMENT;
+    
+    case "Armor Up 1":
+    case "Armor Up 2":
+    case "Armor Up 3":
+    case "Armor Regeneration":
+    case "Shield 1":
+    case "Shield 2":
+    case "Shield 3":
+    case "Shield Regeneration":
+    case "Magnet 1":
+    case "Magnet 2":
+      return UpgradeCategory.DEFENSE;
+    
+    case "Laser 1":
+    case "Laser 2":
+    case "Laser 3":
+    case "Laser 4":
+    case "Piercing Laser":
+    case "Extended Laser 1":
+    case "Extended Laser 2":
+    case "Wide Laser 1":
+    case "Wide Laser 2":
+    case "Bouncing Laser":
+    case "Tunneling Laser":
+      return UpgradeCategory.LASER;
+    
+    case "Missile 1":
+    case "Missile 2":
+    case "Missile 3":
+    case "Missile 4":
+    case "Multi-Launch 1":
+    case "Multi-Launch 2":
+    case "Missile Reload 1":
+    case "Missile Reload 2":
+    case "Blast Radius 1":
+    case "BLast Radius 2":
+    case "Bouncing Missile":
+      return UpgradeCategory.MISSILE;
+    
+    case "Razor Disc 1":
+    case "Razor Disc 2":
+    case "Razor Disc 3":
+    case "Razor Disc 4":
+    case "Multi-Disc 1":
+    case "Multi-Disc 2":
+    case "Multi-Disc 3":
+    case "Disc Bounce 1":
+    case "Disc Bounce 2":
+    case "Disc Bounce 3":
+    case "Fast Disc":
+      return UpgradeCategory.DISC;
+    
+    case "Electric Shock 1":
+    case "Electric Shock 2":
+    case "Electric Shock 3":
+    case "Electric Shock 4":
+    case "Shock Speed 1":
+    case "Shock Speed 2":
+    case "Long Arc 1":
+    case "Long Arc 2":
+    case "Long Arc 3":
+    case "Chain Shock":
+      return UpgradeCategory.ELECTRIC;
+    
+    default:
+      return UpgradeCategory.BASE;
   }
 }
 
 class RootUpgrade
 {
   
+}
+
+public enum UpgradeCategory
+{
+  BASE,
+  MOVEMENT, DEFENSE, LASER, MISSILE, DISC, ELECTRIC
 }
 
 //Enough extra cash will earn an extra upgrade

@@ -1,4 +1,8 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy;
+
+PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
+
+HashMap<String, PImage> upgradeImages = new HashMap<>();
 
 class GameData
 {
@@ -14,9 +18,15 @@ class GameData
   
   float enemyBaseSize = 75;
   float bossBaseSize = 150;
+  
+  int missileSize = 30;
 
   public void loadImages()
   {
+    //Floppy Disc
+    floppy = loadImage("floppy.png");
+    floppy.resize(30,0);
+    
     //Map
     tile = loadImage("tile3.png");
     tile.resize(0,int(data.blockSize));
@@ -46,5 +56,84 @@ class GameData
     decor[3] = loadImage("decor3.png");
     decor[3].resize(int(data.blockSize),0);
     
+    //Upgrades
+    //Movement
+    upgradeImages.put("Movement Speed 1", loadImage("greenArrow.png") );
+    upgradeImages.put("Movement Speed 2", loadImage("twoArrows.png") );
+    upgradeImages.put("Movement Speed 3", loadImage("threeArrows.png") );
+    upgradeImages.put("Movement Speed 4", loadImage("fourArrows.png") );
+    upgradeImages.put("Knockback Resist",loadImage("purpleFoot.png") );
+    upgradeImages.put("Pushback",loadImage("fushaFoot.png") );
+    upgradeImages.put("Forceful Pushback",loadImage("redFoot.png") );
+    upgradeImages.put("Rotation Speed 1",loadImage("rotate.png") );
+    upgradeImages.put("Rotation Speed 2",loadImage("rotate2.png") );
+    upgradeImages.put("Rotation Speed 3",loadImage("rotate3.png") );
+    upgradeImages.put("Turn-Slow",loadImage("turnSlow.png") );
+    upgradeImages.put("Turn-Stop",loadImage("turnStop.png") );
+    //Defense
+    upgradeImages.put("Armor Up 1", loadImage("tool.png") );
+    upgradeImages.put("Armor Up 2", loadImage("tools2.png") );
+    upgradeImages.put("Armor Up 3", loadImage("tools3.png") );
+    upgradeImages.put("Armor Regeneration", loadImage("regen.png") );
+    upgradeImages.put("Shield 1", loadImage("shield.png") );
+    upgradeImages.put("Shield 2", loadImage("shield2.png") );
+    upgradeImages.put("Shield 3", loadImage("shield3.png") );
+    upgradeImages.put("Shield Regeneration", loadImage("shieldRegen.png") );
+    upgradeImages.put("Magnet 1", loadImage("magnet.png") );
+    upgradeImages.put("Magnet 2", loadImage("magnet2.png") );
+    //Laser
+    upgradeImages.put("Laser 1",loadImage("laser1.png") );
+    upgradeImages.put("Laser 2",loadImage("laser2.png") );
+    upgradeImages.put("Laser 3",loadImage("laser3.png") );
+    upgradeImages.put("Laser 4",loadImage("laser4.png") );
+    upgradeImages.put("Piercing Laser",loadImage("pierce.png") );
+    upgradeImages.put("Extended Laser 1",loadImage("laserRange.png") );
+    upgradeImages.put("Extended Laser 2",loadImage("laserRange2.png") );
+    upgradeImages.put("Wide Laser 1",loadImage("laserWidth.png") );
+    upgradeImages.put("Wide Laser 2",loadImage("laserWidth2.png") );
+    upgradeImages.put("Bouncing Laser",loadImage("laserBounce.png") );
+    upgradeImages.put("Tunneling Laser",loadImage("tunnel.png") );
+    //Missiles
+    upgradeImages.put("Missile 1",loadImage("decor1.png") );
+    upgradeImages.put("Missile 2",loadImage("decor1.png") );
+    upgradeImages.put("Missile 3",loadImage("decor1.png") );
+    upgradeImages.put("Missile 4",loadImage("decor1.png") );
+    upgradeImages.put("Multi-Launch 1",loadImage("decor1.png") );
+    upgradeImages.put("Multi-Launch 2",loadImage("decor1.png") );
+    upgradeImages.put("Missile Reload 1",loadImage("decor1.png") );
+    upgradeImages.put("Missile Reload 2",loadImage("decor1.png") );
+    upgradeImages.put("Blast Radius 1",loadImage("decor1.png") );
+    upgradeImages.put("Blast Radius 2",loadImage("decor1.png") );
+    upgradeImages.put("Bouncing Missile",loadImage("decor1.png") );
+    //Discs
+    upgradeImages.put("Razor Disc 1",loadImage("decor1.png") );
+    upgradeImages.put("Razor Disc 2",loadImage("decor1.png") );
+    upgradeImages.put("Razor Disc 3",loadImage("decor1.png") );
+    upgradeImages.put("Razor Disc 4",loadImage("decor1.png") );
+    upgradeImages.put("Multi-Disc 1",loadImage("decor1.png") );
+    upgradeImages.put("Multi-Disc 2",loadImage("decor1.png") );
+    upgradeImages.put("Multi-Disc 3",loadImage("decor1.png") );
+    upgradeImages.put("Disc Bounce 1",loadImage("decor1.png") );
+    upgradeImages.put("Disc Bounce 2",loadImage("decor1.png") );
+    upgradeImages.put("Disc Bounce 3",loadImage("decor1.png") );
+    upgradeImages.put("Fast Disc",loadImage("decor1.png") );
+    //Shock
+    upgradeImages.put("Electric Shock 1",loadImage("decor1.png") );
+    upgradeImages.put("Electric Shock 2",loadImage("decor1.png") );
+    upgradeImages.put("Electric Shock 3",loadImage("decor1.png") );
+    upgradeImages.put("Electric Shock 4",loadImage("decor1.png") );
+    upgradeImages.put("Shock Speed 1",loadImage("decor1.png") );
+    upgradeImages.put("Shock Speed 2",loadImage("decor1.png") );
+    upgradeImages.put("Long Arc 1",loadImage("decor1.png") );
+    upgradeImages.put("Long Arc 2",loadImage("decor1.png") );
+    upgradeImages.put("Long Arc 3",loadImage("decor1.png") );
+    upgradeImages.put("Chain Shock",loadImage("decor1.png") );
+    
+    //Projectiles
+    missilePic = loadImage("missile.png"); missilePic.resize(missileSize,0);
+    disc = loadImage("disc2.png"); disc.resize(missileSize,0);
+    bolt = loadImage("bolt.png"); bolt.resize(missileSize,0);
+    laserImage = loadImage("laser.png"); laserImage.resize(missileSize,0);
+    explosionSmall = loadImage("boom.png"); explosionSmall.resize(missileSize,0);
   }
 }

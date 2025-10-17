@@ -5,8 +5,11 @@ public abstract class MovingThing
   float xAcc, yAcc;
   float size;
   
+  boolean finished;
+  
   abstract public void move();
   abstract public void show();
+  abstract public boolean checkExpiration(); //May not need to be boolean anymore
   
   public void bounce( Block b )
   {
@@ -27,18 +30,17 @@ public abstract class MovingThing
     
  
   }
-}
-
-class TestBall extends MovingThing
-{
-  public void move()
+  
+  public boolean intersects( MovingThing m )
   {
-    xPos += xSpd;
-    yPos += ySpd;
+    return ( dist(xPos,yPos,m.xPos,m.yPos) < (size+m.size)/4 );
   }
   
-  public void show()
+  public float laserWidth( Robot r )
   {
-    circle(xPos, yPos, size);
+    if( r.upgrades.get("Wide Laser 2") ) return data.enemyBaseSize*4;
+    if( r.upgrades.get("Wide Laser 1") ) return data.enemyBaseSize*2;
+    else return data.enemyBaseSize;
   }
+  
 }
