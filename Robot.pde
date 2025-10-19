@@ -253,7 +253,7 @@ class Robot extends MovingThing
   {
     if( upgrades.get(name) )
     {
-      println("Tried to activated " + name + " when it was already active.");
+      println("Tried to activate " + name + " when it was already active.");
       return;
     }
     
@@ -296,7 +296,7 @@ class Robot extends MovingThing
       break;
       case "Multi-Launch 2": upgrades.put("Multi-Launch 1",false);
       break;
-      case "Blast Radius 2": upgrades.put("Missile Reload 1",false);
+      case "Blast Radius 2": upgrades.put("Blast Radius 1",false);
       break;
       case "Razor Disc 4": upgrades.put("Razor Disc 3",false);
       case "Razor Disc 3": upgrades.put("Razor Disc 2",false);

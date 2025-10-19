@@ -59,7 +59,11 @@ class SurvivalState implements GameState
   }
   void goToUpgrade(StateManager manager)
   {
+    //TEST
+    hud.commsBoxOffset = -height;
+    hud.commsBoxOpening = true;
     manager.setState( new UpgradeState() );
+    data.xOffset = data.yOffset = 0;
   }
   void goToBreakdown(StateManager manager)
   {
@@ -88,7 +92,7 @@ class SurvivalState implements GameState
     {
       testMap = new Map(++testMapLevel);
       
-      manager.setState( new UpgradeState() );
+      manager.goToUpgrade();
     
       robot.xPos = testMap.startingPoint('x');
       robot.yPos = testMap.startingPoint('y');
@@ -159,7 +163,7 @@ class BreakdownState implements GameState
   }
   void goToUpgrade(StateManager manager)
   {
-    println("ERROR: Update switched to Update");
+    println("ERROR: Breakdown switched to Update");
   }
   void goToBreakdown(StateManager manager)
   {

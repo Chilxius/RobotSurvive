@@ -101,7 +101,14 @@ class ChoiceWheel
     
     //Wheel has effectively stopped
     if( state != WheelState.START && spinSpeed <= 0.002 )
+    {
       state = WheelState.STOPPED;
+      
+      //TEST
+      hud.upgradeString = segments.get( int(((TWO_PI - (angle % TWO_PI)) / (TWO_PI/segments.size())) % segments.size()) ).name;
+      hud.installBoxOpening = true;
+      robot.activateUpgrade(hud.upgradeString);
+    }
   }
   
   public void pressReact( boolean pressed )

@@ -1,12 +1,17 @@
 //Game Jam Challenge: One Button
 //Robots vs Vampires
 
+//NEXT: Get floppys to transfer
+//      Add text for scientist name, ip, collected floppys
+//      Get upgrades to come from the tree
+
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
 //Get images centered on wheel chunks
 //Replace explosion - this image was downloaded
 
 //Only make movers draw if on screen
+//Make installs only happen when wheel stops, not constantly
 
 import processing.sound.*;
 import java.util.Collections;
@@ -27,6 +32,7 @@ GameData data;// = new GameData();
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 //ArrayList<MovingThing> projectiles = new ArrayList<MovingThing>();
+ArrayList<GhostWords> ghostWords = new ArrayList<GhostWords>();
 
 color dangerColor = color(0,0,200);
 
@@ -67,34 +73,36 @@ void setup()
   robot.angleSpeed = 0.02;
   robot.xSpd = 1;
   robot.ySpd = 0;
-  //robot.fullName = "Artifice Enforcer Enforcer Enforcer [Experimental]";
-  //robot.fullName = "Bob";
   createUpgradeTree(robot);
-  //robot.upgrades.put("Rotation Speed 2",true);
-  //robot.upgrades.put("Extended Laser 2",true);
-  //robot.upgrades.put("Bouncing Laser",true);
-  //robot.upgrades.put("Movement Speed 4",true);
-  //robot.upgrades.put("Laser 1",true);
-  //robot.upgrades.put("Laser 2",true);
-  //robot.upgrades.put("Laser 3",true);
-  //robot.upgrades.put("Laser 4",true);
+
   
-  //robot.activateUpgrade("Laser 1");
-  //robot.activateUpgrade("Laser 2");
-  //robot.activateUpgrade("Laser 3");
-  //robot.activateUpgrade("Laser 4");
-  //robot.activateUpgrade("Extended Laser 1");
-  //robot.activateUpgrade("Extended Laser 2");
-  //robot.activateUpgrade("Movement Speed 1");
-  //robot.activateUpgrade("Movement Speed 2");
-  robot.activateUpgrade("Rotation Speed 1");
-  //robot.activateUpgrade("Turn-Slow");
-  //robot.activateUpgrade("Bouncing Laser");
-  //robot.activateUpgrade("Shield 1");
+  //robot.activateUpgrade("Movement Speed 4");
+  //robot.activateUpgrade("Forceful Pushback");
+  //robot.activateUpgrade("Rotation Speed 3");
+  //robot.activateUpgrade("Turn-Stop");
+  
+  //robot.activateUpgrade("Armor Up 3");
+  //robot.activateUpgrade("Magnet 2");
+  //robot.activateUpgrade("Shield 3");
+  //robot.activateUpgrade("Armor Regeneration");
   //robot.activateUpgrade("Shield Regeneration");
-  //robot.activateUpgrade("Armor Up 2");
-  //robot.activateUpgrade("Magnet 1");
-  robot.activateUpgrade("Movement Speed 2");
+  
+  //robot.activateUpgrade("Laser 4");
+  //robot.activateUpgrade("Extended Laser 2");
+  //robot.activateUpgrade("Wide Laser 2");
+  //robot.activateUpgrade("Piercing Laser");
+  //robot.activateUpgrade("Bouncing Laser");
+  
+  //robot.activateUpgrade("Missile 4");
+  //robot.activateUpgrade("Multi-Launch 2");
+  //robot.activateUpgrade("Missile Reload 2");
+  //robot.activateUpgrade("Blast Radius 2");
+  //robot.activateUpgrade("Bouncing Missile");
+  
+  //robot.activateUpgrade("Razor Disc 4");
+  //robot.activateUpgrade("Multi-Disc 3");
+  //robot.activateUpgrade("Disc Bounce 3");
+  //robot.activateUpgrade("Fast Disc");
   
   //guide = new TurnGuide( 100, height-100, robot );
   
@@ -113,12 +121,12 @@ void setup()
   movers.add(testEnemy2);
   
   testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
-  testWheel.addUpgrade( new Upgrade("Movement Speed 1") );
   //testWheel.segments.get(0).image = loadImage("testFace2.png");
-  testWheel.addUpgrade( new Upgrade("Shield 3") );
-  testWheel.addUpgrade( new Upgrade("Laser 1") );
+  testWheel.addUpgrade( new Upgrade("Extended Laser 1") );
+  testWheel.addUpgrade( new Upgrade("Armor Up 1") );
+  testWheel.addUpgrade( new Upgrade("Laser 2") );
   //testWheel.segments.get(2).image = loadImage("testFace2.png");
-  testWheel.addUpgrade( new Upgrade("Piercing Laser") );
+  testWheel.addUpgrade( new Upgrade("Shield 1") );
   //testWheel.addUpgrade( new Upgrade() );
   //testWheel.addUpgrade( new Upgrade() );
 }
@@ -150,6 +158,18 @@ void draw()
   
   //text(projectiles.size()+"",100,100);
   //text(movers.size()+"",100,200);
+  
+  for( GhostWords gw: ghostWords )
+    gw.show();
+  for( int i = 0; i < ghostWords.size(); i++ )
+  {
+    ghostWords.get(i).show();
+    if(ghostWords.get(i).timer < millis())
+    {
+      ghostWords.remove(i);
+      i--;
+    }
+  }
 }
 
 //Got help from ChatGPT - this shoud work unless there are thousands of objects
@@ -200,83 +220,8 @@ public void checkMoversForRemoval()
   //    projectiles.remove(i);
 }
 
-//Create tree here
 public void createUpgradeTree( Robot r )
-{
-  //String [] upgradeNames =
-  //{
-  //  "Movement Speed 1",
-  //  "Movement Speed 2",
-  //  "Movement Speed 3",
-  //  "Movement Speed 4",
-  //  "Knockback Resist",
-  //  "Pushback",
-  //  "Forceful Pushback",
-  //  "Rotation Speed 1",
-  //  "Rotation Speed 2",
-  //  "Rotation Speed 3",
-  //  "Turn-slow",
-  //  "Turn-stop",
-    
-  //  "Armor Up 1",
-  //  "Armor Up 2",
-  //  "Armor Up 3",
-  //  "Armor Regeneration",
-  //  "Shield 1",
-  //  "Shield 2",
-  //  "Shield 3",
-  //  "Shield Regeneration",
-  //  "Magnet 1",
-  //  "Magnet 2",
-    
-  //  "Laser 1",
-  //  "Laser 2",
-  //  "Laser 3",
-  //  "Laser 4",
-  //  "Piercing Laser",
-  //  "Extended Laser 1",
-  //  "Extended Laser 2",
-  //  "Wide Laser 1",
-  //  "Wide Laser 2",
-  //  "Bouncing Laser",
-  //  "Tunneling Laser",
-    
-  //  "Missile 1",
-  //  "Missile 2",
-  //  "Missile 3",
-  //  "Missile 4",
-  //  "Multi-Launch 1",
-  //  "Multi-Launch 2",
-  //  "Missile Reload 1",
-  //  "Missile Reload 2",
-  //  "Blast Radius 1",
-  //  "BLast Radius 2",
-  //  "Bouncing Missile",
-    
-  //  "Razor Disc 1",
-  //  "Razor Disc 2",
-  //  "Razor Disc 3",
-  //  "Razor Disc 4",
-  //  "Multi-Disc 1",
-  //  "Multi-Disc 2",
-  //  "Multi-Disc 3",
-  //  "Disc Bounce 1",
-  //  "Disc Bounce 2",
-  //  "Disc Bounce 3",
-  //  "Fast Disc",
-    
-  //  "Electric Shock 1",
-  //  "Electric Shock 2",
-  //  "Electric Shock 3",
-  //  "Electric Shock 4",
-  //  "Shock Speed 1",
-  //  "Shock Speed 2",
-  //  "Long Arc 1",
-  //  "Long Arc 2",
-  //  "Long Arc 3",
-  //  "Chain Shock"
-  //};
-  
+{ 
   for(String s: upgradeImages.keySet())
   {
     r.upgrades.put(s,false);
@@ -307,6 +252,16 @@ public void keyPressed()
     robot.activateUpgrade("Armor Up 3");
   if( key == ' ' )
     robot.armor--;
+  if( key == 'q' )
+    new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
+  if( key == 'w' )
+    new GhostWords( "Press to Spin Upgrade Wheel", width*2/3, height-150 );
+  if( key == 'b' )
+    robot.activateUpgrade("Blast Radius 1");
+  if( key == 'x' )
+    robot.activateUpgrade("Blast Radius 2");
+    
+  println(mouseX + " " + mouseY);
 }
 
 public void keyReleased()

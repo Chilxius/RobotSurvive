@@ -90,7 +90,7 @@ public UpgradeCategory categoryByName( String name )
     case "Missile Reload 1":
     case "Missile Reload 2":
     case "Blast Radius 1":
-    case "BLast Radius 2":
+    case "Blast Radius 2":
     case "Bouncing Missile":
       return UpgradeCategory.MISSILE;
     

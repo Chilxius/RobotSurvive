@@ -1,4 +1,4 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 
@@ -26,6 +26,10 @@ class GameData
     //Floppy Disc
     floppy = loadImage("floppy.png");
     floppy.resize(30,0);
+    
+    //Static
+    staticPic = loadImage("static.png");
+    staticPic.resize(370,0);
     
     //Map
     tile = loadImage("tile3.png");
@@ -94,29 +98,29 @@ class GameData
     upgradeImages.put("Bouncing Laser",loadImage("laserBounce.png") );
     upgradeImages.put("Tunneling Laser",loadImage("tunnel.png") );
     //Missiles
-    upgradeImages.put("Missile 1",loadImage("decor1.png") );
-    upgradeImages.put("Missile 2",loadImage("decor1.png") );
-    upgradeImages.put("Missile 3",loadImage("decor1.png") );
-    upgradeImages.put("Missile 4",loadImage("decor1.png") );
-    upgradeImages.put("Multi-Launch 1",loadImage("decor1.png") );
-    upgradeImages.put("Multi-Launch 2",loadImage("decor1.png") );
-    upgradeImages.put("Missile Reload 1",loadImage("decor1.png") );
-    upgradeImages.put("Missile Reload 2",loadImage("decor1.png") );
-    upgradeImages.put("Blast Radius 1",loadImage("decor1.png") );
-    upgradeImages.put("Blast Radius 2",loadImage("decor1.png") );
-    upgradeImages.put("Bouncing Missile",loadImage("decor1.png") );
+    upgradeImages.put("Missile 1",loadImage("missile 1.png") );
+    upgradeImages.put("Missile 2",loadImage("missile 2.png") );
+    upgradeImages.put("Missile 3",loadImage("missile 3.png") );
+    upgradeImages.put("Missile 4",loadImage("missile 4.png") );
+    upgradeImages.put("Multi-Launch 1",loadImage("multiMissile 1.png") );
+    upgradeImages.put("Multi-Launch 2",loadImage("multiMissile 2.png") );
+    upgradeImages.put("Missile Reload 1",loadImage("missileReload 1.png") );
+    upgradeImages.put("Missile Reload 2",loadImage("missileReload 2.png") );
+    upgradeImages.put("Blast Radius 1",loadImage("boom.png") );
+    upgradeImages.put("Blast Radius 2",loadImage("bigBoom.png") );
+    upgradeImages.put("Bouncing Missile",loadImage("missileBounce.png") );
     //Discs
-    upgradeImages.put("Razor Disc 1",loadImage("decor1.png") );
-    upgradeImages.put("Razor Disc 2",loadImage("decor1.png") );
-    upgradeImages.put("Razor Disc 3",loadImage("decor1.png") );
-    upgradeImages.put("Razor Disc 4",loadImage("decor1.png") );
-    upgradeImages.put("Multi-Disc 1",loadImage("decor1.png") );
-    upgradeImages.put("Multi-Disc 2",loadImage("decor1.png") );
-    upgradeImages.put("Multi-Disc 3",loadImage("decor1.png") );
-    upgradeImages.put("Disc Bounce 1",loadImage("decor1.png") );
-    upgradeImages.put("Disc Bounce 2",loadImage("decor1.png") );
-    upgradeImages.put("Disc Bounce 3",loadImage("decor1.png") );
-    upgradeImages.put("Fast Disc",loadImage("decor1.png") );
+    upgradeImages.put("Razor Disc 1",loadImage("disc 1.png") );
+    upgradeImages.put("Razor Disc 2",loadImage("disc 2.png") );
+    upgradeImages.put("Razor Disc 3",loadImage("disc 3.png") );
+    upgradeImages.put("Razor Disc 4",loadImage("disc 4.png") );
+    upgradeImages.put("Multi-Disc 1",loadImage("multiDisc 1.png") );
+    upgradeImages.put("Multi-Disc 2",loadImage("multiDisc 2.png") );
+    upgradeImages.put("Multi-Disc 3",loadImage("multiDisc 3.png") );
+    upgradeImages.put("Disc Bounce 1",loadImage("discBounce 1.png") );
+    upgradeImages.put("Disc Bounce 2",loadImage("discBounce 2.png") );
+    upgradeImages.put("Disc Bounce 3",loadImage("discBounce 3.png") );
+    upgradeImages.put("Fast Disc",loadImage("fastDisc.png") );
     //Shock
     upgradeImages.put("Electric Shock 1",loadImage("decor1.png") );
     upgradeImages.put("Electric Shock 2",loadImage("decor1.png") );
@@ -131,7 +135,7 @@ class GameData
     
     //Projectiles
     missilePic = loadImage("missile.png"); missilePic.resize(missileSize,0);
-    disc = loadImage("disc2.png"); disc.resize(missileSize,0);
+    disc = loadImage("disc.png"); disc.resize(missileSize,0);
     bolt = loadImage("bolt.png"); bolt.resize(missileSize,0);
     laserImage = loadImage("laser.png"); laserImage.resize(missileSize,0);
     explosionSmall = loadImage("boom.png"); explosionSmall.resize(missileSize,0);
