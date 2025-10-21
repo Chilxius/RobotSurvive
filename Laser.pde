@@ -67,6 +67,20 @@ class Laser extends MovingThing
           oY = yPos;
           bounce( testMap.intersectingBlock(this) );
         }
+        else if( robot.upgrades.get("Tunneling Laser") )
+        {
+          /* do nothing */
+          
+          ////This would look cool, but wouldn't hit enemies inside walls
+          //new Remnant(this,oX,oY);
+          //while( testMap.intersectingBlock(this)!= null )
+          //{
+          //  xPos += xSpd;
+          //  yPos += ySpd;
+          //}
+          //oX = xPos;
+          //oY = yPos;
+        }
         else
         {
           new Remnant(xPos,yPos);

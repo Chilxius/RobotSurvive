@@ -66,6 +66,15 @@ class Missile extends MovingThing implements Projectile
     ySpd *= 0.999;
   }
   
+  @Override
+  public void bounce( Block b )
+  {
+    if( robot.upgrades.get("Bouncing Missile") )
+      super.bounce(b);
+    else
+      expiration = 0;
+  }
+  
   public boolean checkExpiration()
   {
     if(!finished && millis() > expiration)
@@ -81,7 +90,7 @@ class Missile extends MovingThing implements Projectile
 
 class Disc extends MovingThing
 {
-  int expiration;
+  //int expiration;
   boolean step;
   
   Disc( Robot r )
@@ -101,7 +110,7 @@ class Disc extends MovingThing
     
     size = data.missileSize;
     
-    expiration = 2; //walls it can bounce off
+    //expiration = 2; //walls it can bounce off
     
     movers.add(this);
     
@@ -126,11 +135,37 @@ class Disc extends MovingThing
   }
   
   @Override
-  public void bounce(Block b)
+  public void bounce(Block b) //Fast disc provides a 50% increase in bounces
   {
     super.bounce(b);
-    xSpd *= .90;
-    ySpd *= .90;
+    float friction;
+    if( robot.upgrades.get("Disc Bounce 3") )
+    {
+      friction = 0.90; //8
+      if( robot.upgrades.get("Fast Disc") )
+        friction = 0.87; //12
+    }
+    else if( robot.upgrades.get("Disc Bounce 2") )
+    {
+      friction = 0.85; //6
+      if( robot.upgrades.get("Fast Disc") )
+        friction = 0.82;//8
+    }
+    else if( robot.upgrades.get("Disc Bounce 1") )
+    {
+      friction = 0.80; //4
+      if( robot.upgrades.get("Fast Disc") )
+        friction = 0.74; //6
+    }
+    else
+    {
+      friction = 0.60; //2
+      if( robot.upgrades.get("Fast Disc") )
+        friction = 0.55; //3
+    }
+      
+    xSpd *= friction;
+    ySpd *= friction;
   }
   
   public boolean checkExpiration()

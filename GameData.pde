@@ -1,6 +1,7 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
+PImage fireball, fireCharge, voice, brainBlast;
 
 HashMap<String, PImage> upgradeImages = new HashMap<>();
 
@@ -20,6 +21,9 @@ class GameData
   float bossBaseSize = 150;
   
   int missileSize = 30;
+  
+  float upgradeWheelSize = 200;
+  float upgradeBarSize = 45;
 
   public void loadImages()
   {
@@ -30,6 +34,10 @@ class GameData
     //Static
     staticPic = loadImage("static.png");
     staticPic.resize(370,0);
+    
+    //Shield
+    shieldPic = loadImage("shield.png");
+    shieldPic.resize(int(data.playerSize),0);
     
     //Map
     tile = loadImage("tile3.png");
@@ -139,5 +147,10 @@ class GameData
     bolt = loadImage("bolt.png"); bolt.resize(missileSize,0);
     laserImage = loadImage("laser.png"); laserImage.resize(missileSize,0);
     explosionSmall = loadImage("boom.png"); explosionSmall.resize(missileSize,0);
+    
+    fireball = loadImage("FireBall.png"); fireball.resize(missileSize,0);
+    fireCharge = loadImage("fireCharge.png"); fireCharge.resize(missileSize,0);
+    voice = loadImage("voice.png"); voice.resize(missileSize*2,0);
+    brainBlast = loadImage("brainBlast.png"); brainBlast.resize(missileSize*2,0);
   }
 }

@@ -24,6 +24,10 @@ class Robot extends MovingThing
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
   int armor; //health
+  int nextArmorRegen;
+  
+  int shield;
+  int nextShieldRegen;
   
   public Robot( String name, PApplet parent )
   {
@@ -52,6 +56,8 @@ class Robot extends MovingThing
       recordAndDrawPointers();
     cosmetics.display(xPos+data.xOffset,yPos+data.yOffset);
     //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
+    if( shield > 0 )
+      drawShield();
   }
   
   public void move()
@@ -63,8 +69,21 @@ class Robot extends MovingThing
     //xSpd += xAcc;
     //ySpd += yAcc;
     
-    xPos += xSpd;
-    yPos += ySpd;
+    if( turning && upgrades.get("Turn-Stop") )
+    {
+      //don't move
+    }
+    else if( turning && upgrades.get("Turn-Slow") )
+    {
+      xPos += xSpd/2;
+      yPos += ySpd/2;
+    }
+    else
+    {
+      xPos += xSpd;
+      yPos += ySpd;
+    }
+    
     
     //xSpd *= .95;
     //ySpd *= .95;
@@ -72,6 +91,40 @@ class Robot extends MovingThing
     checkForScroll();
     
     checkForExit();
+  }
+  
+  //Weapons and abilities
+  public void activate()
+  {
+    //Armor Regen
+    if( upgrades.get("Armor Regeneration") && nextArmorRegen < millis() )
+    {
+      restoreArmor(1);
+      nextArmorRegen = millis() + 5000;
+    }
+    
+    //Shield
+    if( shield < getMaxShield() )
+    {
+      if( upgrades.get("Shield Regeneration") && nextShieldRegen < millis() )
+      {
+        restoreShield(1);
+        nextShieldRegen = millis() + 5000;
+      } 
+      else if( nextShieldRegen < millis() )
+      {
+        restoreShield(1);
+        nextShieldRegen = millis() + 10000;
+      } 
+    }
+  }
+  
+  private void drawShield()
+  {
+    push();
+    tint(255,50);
+    image( shieldPic, xPos+data.xOffset, yPos+data.yOffset );
+    pop();
   }
   
   public boolean checkExpiration()
@@ -132,12 +185,34 @@ class Robot extends MovingThing
     yPos = y;
   }
   
+  public void restoreArmor( int amount )
+  {
+    armor += amount;
+    if( armor > getMaxArmor() )
+      armor = getMaxArmor();
+  }
+  
+  public void restoreShield( int amount )
+  {
+    shield += amount;
+    if( shield > 3 )
+      shield = 3;
+  }
+  
   public int getMaxArmor()
   {
     if( upgrades.get("Armor Up 3") ) return 100;
     if( upgrades.get("Armor Up 2") ) return 70;
     if( upgrades.get("Armor Up 1") ) return 40;
     return 20;
+  }
+  
+  private int getMaxShield()
+  {
+    if( upgrades.get("Shield 3") ) return 3;
+    if( upgrades.get("Shield 2") ) return 2;
+    if( upgrades.get("Shield 1") ) return 1;
+    return 0;
   }
   
   private float adjustedSpeed()
@@ -151,8 +226,8 @@ class Robot extends MovingThing
   
   private float adjustedAngleSpeed()
   {
-    if(upgrades.get("Rotation Speed 3")) return 0.03;
-    if(upgrades.get("Rotation Speed 2")) return 0.025;
+    if(upgrades.get("Rotation Speed 3")) return 0.04;
+    if(upgrades.get("Rotation Speed 2")) return 0.03;
     if(upgrades.get("Rotation Speed 1")) return 0.02;
     return 0.015;
   }

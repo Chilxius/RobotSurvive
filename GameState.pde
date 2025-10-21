@@ -64,6 +64,8 @@ class SurvivalState implements GameState
     hud.commsBoxOpening = true;
     manager.setState( new UpgradeState() );
     data.xOffset = data.yOffset = 0;
+    //testWheel.buildWheel(4);
+    testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
   }
   void goToBreakdown(StateManager manager)
   {
@@ -85,7 +87,9 @@ class SurvivalState implements GameState
     {
       moveAllMovers();
       checkMoversForRemoval();
-      //robot.guide.display(); 
+      checkAllShooters();
+      //robot.guide.display();
+      //robot.activate();
     }
     
     if( testMap.fade >= 255 )
@@ -99,6 +103,8 @@ class SurvivalState implements GameState
     }
     
     hud.display(false);
+    
+    handleGhostWords();
   }
   
   void reactToPress()
@@ -138,6 +144,7 @@ class UpgradeState implements GameState
     hud.display(true);
     if( robot.armor < robot.getMaxArmor() )
       robot.armor++;
+    handleGhostWords();
   }
   
   void reactToPress()

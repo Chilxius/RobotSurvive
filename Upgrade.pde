@@ -26,8 +26,8 @@ public color colorByCategory(UpgradeCategory category)
   switch(category)
   {
     case MOVEMENT: return color(200,200,0);
-    case DEFENSE:  return color(0,0,100);
-    case LASER:    return color(0,100,0);
+    case DEFENSE:  return color(0,100,0);
+    case LASER:    return color(0,0,200);
     case MISSILE:  return color(100,100,100);
     case DISC:     return color(100,0,0);
     case ELECTRIC: return color(200,200,0);

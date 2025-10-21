@@ -3,7 +3,10 @@
 
 //NEXT: Get floppys to transfer
 //      Add text for scientist name, ip, collected floppys
-//      Get upgrades to come from the tree
+//      Get enemies to shove robot
+//      Have upgrades do their effect
+//      Make level start better
+//      Move hitbox to bottom middle
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
@@ -74,61 +77,9 @@ void setup()
   robot.xSpd = 1;
   robot.ySpd = 0;
   createUpgradeTree(robot);
+  
+  setupTestingStuff();
 
-  
-  //robot.activateUpgrade("Movement Speed 4");
-  //robot.activateUpgrade("Forceful Pushback");
-  //robot.activateUpgrade("Rotation Speed 3");
-  //robot.activateUpgrade("Turn-Stop");
-  
-  //robot.activateUpgrade("Armor Up 3");
-  //robot.activateUpgrade("Magnet 2");
-  //robot.activateUpgrade("Shield 3");
-  //robot.activateUpgrade("Armor Regeneration");
-  //robot.activateUpgrade("Shield Regeneration");
-  
-  //robot.activateUpgrade("Laser 4");
-  //robot.activateUpgrade("Extended Laser 2");
-  //robot.activateUpgrade("Wide Laser 2");
-  //robot.activateUpgrade("Piercing Laser");
-  //robot.activateUpgrade("Bouncing Laser");
-  
-  //robot.activateUpgrade("Missile 4");
-  //robot.activateUpgrade("Multi-Launch 2");
-  //robot.activateUpgrade("Missile Reload 2");
-  //robot.activateUpgrade("Blast Radius 2");
-  //robot.activateUpgrade("Bouncing Missile");
-  
-  //robot.activateUpgrade("Razor Disc 4");
-  //robot.activateUpgrade("Multi-Disc 3");
-  //robot.activateUpgrade("Disc Bounce 3");
-  //robot.activateUpgrade("Fast Disc");
-  
-  //guide = new TurnGuide( 100, height-100, robot );
-  
-  movers.add(robot);
-  
-  testEnemy = new Enemy( new SkeletonBehavior(), robot, 1 );
-  testEnemy.xPos = 500;
-  testEnemy.yPos = 1300;
-  
-  movers.add(testEnemy);
-  
-  testEnemy2 = new Enemy( new GhostBehavior(), robot, 1 );
-  testEnemy2.xPos = 500;
-  testEnemy2.yPos = 900;
-  
-  movers.add(testEnemy2);
-  
-  testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
-  //testWheel.segments.get(0).image = loadImage("testFace2.png");
-  testWheel.addUpgrade( new Upgrade("Extended Laser 1") );
-  testWheel.addUpgrade( new Upgrade("Armor Up 1") );
-  testWheel.addUpgrade( new Upgrade("Laser 2") );
-  //testWheel.segments.get(2).image = loadImage("testFace2.png");
-  testWheel.addUpgrade( new Upgrade("Shield 1") );
-  //testWheel.addUpgrade( new Upgrade() );
-  //testWheel.addUpgrade( new Upgrade() );
 }
 
 void draw()
@@ -158,7 +109,11 @@ void draw()
   
   //text(projectiles.size()+"",100,100);
   //text(movers.size()+"",100,200);
-  
+
+}
+
+public void handleGhostWords()
+{
   for( GhostWords gw: ghostWords )
     gw.show();
   for( int i = 0; i < ghostWords.size(); i++ )
@@ -197,13 +152,52 @@ public void moveAllMovers()
     if( m instanceof Enemy )
     {
       Enemy e = (Enemy) m;
+      
       if( !e.behavior.corporeal )
         continue;
+    }
+    
+    for( int i = 0; i < movers.size(); i++ )
+    {
+      if( m instanceof Enemy && movers.get(i) != m && movers.get(i) instanceof Enemy && dist( m.xPos, m.yPos, movers.get(i).xPos, movers.get(i).yPos ) < (movers.get(i).size+m.size)/2 )
+      {
+        m.shove( movers.get(i) );
+        break;
+      }
     }
     
     Block b = testMap.intersectingBlock( m );
     if( b != null )
       m.bounce(b);
+  }
+}
+
+public void checkAllShooters()
+{
+  for( int i = 0; i < movers.size(); i++ )
+  {
+    if( movers.get(i) instanceof Enemy )
+    {
+      Enemy e = (Enemy) movers.get(i);
+      e.countDownToShot();
+    }
+    if( movers.get(i) instanceof Robot )
+    {
+      Robot r = (Robot) movers.get(i);
+      r.activate();
+    }
+  }
+}
+
+public void checkAllMoversForHits()
+{
+  //Robot, pickups, projectiles, enemies, dangers( bad projectiles)
+  for( int i = 0; i < movers.size(); i++ )
+  {
+    for( int j = i+1; j < movers.size(); j++ )
+    {
+      
+    }
   }
 }
 
@@ -224,9 +218,10 @@ public void createUpgradeTree( Robot r )
 { 
   for(String s: upgradeImages.keySet())
   {
+    println( s );
     r.upgrades.put(s,false);
   } 
-  
+  //println(r.upgrades);
 }
 
 public void mousePressed(){keyPressed();}
@@ -260,11 +255,86 @@ public void keyPressed()
     robot.activateUpgrade("Blast Radius 1");
   if( key == 'x' )
     robot.activateUpgrade("Blast Radius 2");
+  if( key == 'f' )
+    new Fireball(testEnemy);
     
-  println(mouseX + " " + mouseY);
+  //println(mouseX + " " + mouseY);
 }
 
 public void keyReleased()
 {
   manager.reactToRelease();
+}
+
+public void setupTestingStuff()
+{  
+  //robot.activateUpgrade("Movement Speed 4");
+  //robot.activateUpgrade("Rotation Speed 3");
+  robot.activateUpgrade("Fast Disc");
+  robot.activateUpgrade("Disc Bounce 3");
+  robot.activateUpgrade("Extended Laser 1");
+  robot.activateUpgrade("Tunneling Laser");
+  
+  movers.add(robot);
+  
+  testEnemy = new Enemy( new MummyBehavior(), robot, 1 );
+  testEnemy.xPos = 500;
+  testEnemy.yPos = 1300;
+  
+  movers.add(testEnemy);
+  
+  //movers.add( new Enemy( new GhostBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 300;
+  
+  //movers.add( new Enemy( new ZombieBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 400;
+  
+  //movers.add( new Enemy( new SkeletonBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 500;
+  
+  //movers.add( new Enemy( new MummyBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 600;
+  
+  //movers.add( new Enemy( new GhoulBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 700;
+  
+  //movers.add( new Enemy( new VampireBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 800;
+  
+  movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
+  movers.get( movers.size()-1 ).xPos = 400;
+  movers.get( movers.size()-1 ).yPos = 900;
+  
+  //movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 300;
+  
+  //movers.add( new Enemy( new BrainBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 600;
+  
+  //movers.add( new Enemy( new LichBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 900;
+  
+  //movers.add( new Enemy( new MonsterBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 1200;
+  
+  //movers.add( new Enemy( new MageBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 1050;
+  
+  //testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
+  //testWheel.addUpgrade( new Upgrade("Piercing Laser") );
+  //testWheel.addUpgrade( new Upgrade("Bouncing Laser") );
+  //testWheel.addUpgrade( new Upgrade("Disc Bounce 2") );
+  //testWheel.addUpgrade( new Upgrade("Bouncing Missile") );
+  //testWheel.buildWheel(4);
 }

@@ -2,7 +2,8 @@
 
 class ChoiceWheel
 {
-  ArrayList<Upgrade> segments = new ArrayList<Upgrade>();
+  //ArrayList<Upgrade> segments = new ArrayList<Upgrade>();
+  ArrayList<Node<Upgrade>> segments = new ArrayList<Node<Upgrade>>();
   
   float xPos, yPos;
   float wheelSize;
@@ -11,6 +12,7 @@ class ChoiceWheel
   float spinSpeed;
   
   boolean touched;
+  boolean upgradeInstalled;
   
   WheelState state;
   
@@ -23,11 +25,18 @@ class ChoiceWheel
     wheelSize = size;
     state = WheelState.START;
     clicker = new Clicker(this);
+    
+    buildWheel(4);
   }
   
-  public void addUpgrade( Upgrade u )
+  //public void addUpgrade( Upgrade u )
+  //{
+  //  segments.add(u);
+  //}
+  
+  public void addSegment( Node n )
   {
-    segments.add(u);
+    segments.add(n);
   }
   
   public void show()
@@ -47,7 +56,7 @@ class ChoiceWheel
       
     for(int i = 0; i < chunks; i++)
     {
-      fill(segments.get(i).segmentColor);
+      fill(segments.get(i).value.segmentColor);
       stroke(150,150,150); strokeWeight(5);
       arc( 0, 0, wheelSize, wheelSize, 0, size+0, PIE );
       
@@ -64,7 +73,7 @@ class ChoiceWheel
       //Un-roatate so image is upright
       rotate(-angle-size*i+QUARTER_PI);
       
-      image(segments.get(i).image,0,0);
+      image(segments.get(i).value.image,0,0,data.upgradeWheelSize,data.upgradeWheelSize);
       
       pop(); //un-twist
       pop(); //return to wheel chunks
@@ -104,10 +113,17 @@ class ChoiceWheel
     {
       state = WheelState.STOPPED;
       
-      //TEST
-      hud.upgradeString = segments.get( int(((TWO_PI - (angle % TWO_PI)) / (TWO_PI/segments.size())) % segments.size()) ).name;
-      hud.installBoxOpening = true;
-      robot.activateUpgrade(hud.upgradeString);
+      //TEST - installing upgrade and marking the tree node
+      //  also triggers some animation stuff
+      if( !upgradeInstalled )
+      {
+        Node<Upgrade> choice = segments.get( int(((TWO_PI - (angle % TWO_PI)) / (TWO_PI/segments.size())) % segments.size()) );
+        hud.upgradeString = choice.value.name;
+        hud.installBoxOpening = true;
+        robot.activateUpgrade(hud.upgradeString);
+        choice.value.taken = true;
+        upgradeInstalled = true;
+      }
     }
   }
   
@@ -146,6 +162,73 @@ class ChoiceWheel
         if(!touched)
           state = WheelState.SLOWING;
         break;
+    }
+  }
+  
+  //Select upgrades for the wheel
+  //SAFE UNDER CURRENT GAME CONDITONS, but should be made infinite-loop safe for endless mode
+  //Edited to record nodes rather than upgrades, but the old logic is still part of it - needs refactoring
+  public void buildWheel( int items )
+  {
+    Upgrade chunks[] = {null,null,null,null};
+    Node nodeRefs[] = {null,null,null,null};
+    for( int i = 0; i < items; i++ )
+    {
+      boolean keepLooking = true;
+      
+      while( chunks[i] == null || keepLooking ) //Keep trying until a legitimate upgrade is found
+      {
+        
+        Node<Upgrade> current = upgradeTree.children.get( int(random(upgradeTree.children.size())));
+        
+        while( true ) //Iterate down random tree path
+        {
+          //Assign value if leaf node
+          if( current == null || !current.value.taken )
+          {
+            if( current != null )
+            {
+              chunks[i] = current.value;
+              nodeRefs[i] = current;
+            }
+            break;
+          }
+          
+          //Choose random direction
+          int direction = int(random(2));
+          
+          if( direction == 1 && current.left != null )
+            current = current.left;
+          else
+            current = current.right;
+        }
+      
+        ////Avoid duplicates and null values
+        //for(int j = 0; j < chunks.length; j++ )
+        //  if( i != j && chunks[i] != null && chunks[j] != null && chunks[i].name.equals(chunks[j].name) )
+        //    keepLooking = true;
+        //  else
+        //    keepLooking = false;
+        
+        //FIXED - AI help
+        boolean duplicateFound = false;
+        for (int j = 0; j < chunks.length; j++)
+        {
+            if (i != j && chunks[i] != null && chunks[j] != null &&
+                chunks[i].name.equals(chunks[j].name))
+            {
+                duplicateFound = true;
+                break;
+            }
+        }
+        keepLooking = duplicateFound;
+      }
+    }
+    //for( Upgrade u: chunks )
+    for( Node n: nodeRefs )
+    {
+      segments.add( n );
+      //println( n.value.name );
     }
   }
 }

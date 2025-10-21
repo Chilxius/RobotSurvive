@@ -28,12 +28,74 @@ public abstract class MovingThing
       ySpd = -ySpd;
     }
     
- 
+    //Expell
+    //while( inBlock(b) )
+    //{
+    //  println("EXPELL");
+    //  xPos += xSpd;
+    //  yPos += ySpd;
+    //}
+    if (inBlock(b)) //Used to be a while, seems to work better this way
+    {
+      if (abs(xPos - b.xPos) > abs(yPos - b.yPos))
+        xPos += Math.signum(xSpd);
+      else
+        yPos += Math.signum(ySpd);
+    }
   }
+  
+  //Taken from ChatGPT
+  public void shove(MovingThing m)
+  {
+    // Compute difference in position
+    double dx = m.xPos - xPos;
+    double dy = m.yPos - yPos;
+    
+    // Compute distance between the two centers
+    double distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Avoid division by zero (in case objects overlap)
+    if (distance == 0)
+        return;
+    
+    // Normalize the direction vector (unit vector away from this)
+    double nx = dx / distance;
+    double ny = dy / distance;
+    
+    // Apply push along that direction
+    double pushStrength = 1.0;  // tweak this constant for effect
+    m.xSpd += nx * pushStrength;
+    m.ySpd += ny * pushStrength;
+  }
+  
+  public boolean inBlock(Block b)
+  {
+    double half = data.blockSize / 2.0;
+    double myHalf = size / 2.0;
+    
+    boolean overlapX = !(xPos + myHalf < b.xPos - half || xPos - myHalf > b.xPos + half);
+    boolean overlapY = !(yPos + myHalf < b.yPos - half || yPos - myHalf > b.yPos + half);
+    
+    return overlapX && overlapY;
+  }
+  
+  //Y-coordinant
+  public float hitBox()
+  {
+    if( this instanceof Enemy )
+      return yPos+size/3;
+    else
+      return yPos;
+  }
+  
+  //public boolean inBlock( Block b )
+  //{
+  //  return ( xPos >= b.xPos-data.blockSize/1.9 && xPos <= b.xPos+data.blockSize/1.9 && yPos >= b.yPos-data.blockSize/1.9 && yPos <= b.yPos+data.blockSize/1.9 );
+  //}
   
   public boolean intersects( MovingThing m )
   {
-    return ( dist(xPos,yPos,m.xPos,m.yPos) < (size+m.size)/4 );
+    return ( dist(xPos,hitBox(),m.xPos,m.hitBox()) < (size+m.size)/4 );
   }
   
   public float laserWidth( Robot r )

@@ -54,7 +54,10 @@ class HUD
     if( installBoxOpening )
     {
       if( installBoxOffset >= 0 )
+      {
         installBoxOpening = false;
+        manager.goToSurvival();
+      }
       else
         installBoxOffset++;
     }
@@ -245,7 +248,7 @@ class HUD
     rectMode(CORNER);
     rect(width+20,50+50*level,-25-50*icons.size(),50,20);
     for( int i = 0; i < icons.size(); i++ )
-      image( icons.get(i), width-25-50*i, 75+50*level, 45,45);
+      image( icons.get(i), width-25-50*i, 75+50*level, data.upgradeBarSize, data.upgradeBarSize);
     pop();
   }
   
@@ -254,7 +257,20 @@ class HUD
     return new String[]
     {
       "This is the first test output string. These words should fill up the box until the string is finished. Buy Robots vs Vampires from your local Blockbuster today!",
-      "Second string"
+      "Second string",
+      "Third string",
+      "4 string",
+      "5 string",
+      "6 string",
+      "7 string",
+      "8 string",
+      "9 string",
+      "10 string",
+      "11 string",
+      "12 string",
+      "13 string",
+      "14 string",
+      "15 string"
     };
   }
 }
