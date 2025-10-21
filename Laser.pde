@@ -58,14 +58,14 @@ class Laser extends MovingThing
         new Remnant(xPos,yPos); //Creates impact explosion
         break;
       }
-      if( testMap.intersectingBlock(this)!= null )
+      if( map.intersectingBlock(this)!= null )
       {
         if( robot.upgrades.get("Bouncing Laser") )
         {
           new Remnant(this,oX,oY);//,lazColor);
           oX = xPos;
           oY = yPos;
-          bounce( testMap.intersectingBlock(this) );
+          bounce( map.intersectingBlock(this) );
         }
         else if( robot.upgrades.get("Tunneling Laser") )
         {

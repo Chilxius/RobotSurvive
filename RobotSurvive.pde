@@ -6,15 +6,21 @@
 //      Get enemies to shove robot
 //      Have upgrades do their effect
 //      Make level start better
-//      Move hitbox to bottom middle
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
-//Get images centered on wheel chunks
-//Replace explosion - this image was downloaded
 
 //Only make movers draw if on screen
 //Make installs only happen when wheel stops, not constantly
+
+//Stretch Goals:
+//Curse attack
+//Fix covering over exit
+//Replace explosion - this image was downloaded
+//Fancy level start (elevator, tube, etc.)
+//Sound
+//Final cinematic
+//Opening cinematic
 
 import processing.sound.*;
 import java.util.Collections;
@@ -25,8 +31,8 @@ RootNode<Upgrade> upgradeTree;
 
 HUD hud;
 
-Map testMap;
-int testMapLevel = 1;
+Map map;
+int mapLevel = 1;
 
 Enemy testEnemy, testEnemy2;
 
@@ -34,6 +40,7 @@ StateManager manager = new StateManager();
 GameData data;// = new GameData();
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
+ArrayList<MovingThing> trails = new ArrayList<MovingThing>();
 //ArrayList<MovingThing> projectiles = new ArrayList<MovingThing>();
 ArrayList<GhostWords> ghostWords = new ArrayList<GhostWords>();
 
@@ -65,12 +72,12 @@ void setup()
   
   manager.setState( new SurvivalState() );
 
-  testMap = new Map(1);
+  map = new Map(1);
   
   //"test" and "ball"
   robot = new Robot("test", this);
-  robot.xPos = testMap.startingPoint('x');
-  robot.yPos = testMap.startingPoint('y');
+  robot.xPos = map.startingPoint('x');
+  robot.yPos = map.startingPoint('y');
   robot.speed = 2;
   robot.angle = QUARTER_PI;
   robot.angleSpeed = 0.02;
@@ -130,6 +137,9 @@ public void handleGhostWords()
 //Got help from ChatGPT - this shoud work unless there are thousands of objects
 public void showAllMovers()
 {
+  for( MovingThing m: trails )
+    m.show();
+    
   ArrayList<MovingThing> sorted = new ArrayList<MovingThing>(movers);
   
   // Make sure we're calling the method on the list itself
@@ -145,6 +155,9 @@ public void showAllMovers()
 
 public void moveAllMovers()
 {
+  for( MovingThing m: trails )
+    m.move();
+    
   for( MovingThing m: movers )
   {
     m.move();
@@ -166,7 +179,7 @@ public void moveAllMovers()
       }
     }
     
-    Block b = testMap.intersectingBlock( m );
+    Block b = map.intersectingBlock( m );
     if( b != null )
       m.bounce(b);
   }
@@ -180,6 +193,11 @@ public void checkAllShooters()
     {
       Enemy e = (Enemy) movers.get(i);
       e.countDownToShot();
+      if( (e.behavior instanceof VampireBehavior || e.behavior instanceof MageBehavior) && e.nextTrail < millis() )
+      {
+        e.nextTrail = millis() + e.behavior.trailDelay;
+        new Remnant(e);
+      }
     }
     if( movers.get(i) instanceof Robot )
     {
@@ -203,22 +221,26 @@ public void checkAllMoversForHits()
 
 public void checkMoversForRemoval()
 {
+  for( int i = 0; i < trails.size(); i++ )
+    trails.get(i).checkExpiration();
+    
   for( int i = 0; i < movers.size(); i++ )
     movers.get(i).checkExpiration();
+    
+  for( int i = 0; i < trails.size(); i++ )
+    if( trails.get(i).finished )
+      trails.remove(i);  
     
   for( int i = 0; i < movers.size(); i++ )
     if( movers.get(i).finished )
       movers.remove(i);    
-  //for( int i = 0; i < projectiles.size(); i++ )
-  //  if( projectiles.get(i).finished )
-  //    projectiles.remove(i);
 }
 
 public void createUpgradeTree( Robot r )
 { 
   for(String s: upgradeImages.keySet())
   {
-    println( s );
+    //println( s );
     r.upgrades.put(s,false);
   } 
   //println(r.upgrades);
@@ -257,8 +279,6 @@ public void keyPressed()
     robot.activateUpgrade("Blast Radius 2");
   if( key == 'f' )
     new Fireball(testEnemy);
-    
-  //println(mouseX + " " + mouseY);
 }
 
 public void keyReleased()
@@ -268,8 +288,8 @@ public void keyReleased()
 
 public void setupTestingStuff()
 {  
-  //robot.activateUpgrade("Movement Speed 4");
-  //robot.activateUpgrade("Rotation Speed 3");
+  robot.activateUpgrade("Movement Speed 4");
+  robot.activateUpgrade("Rotation Speed 3");
   robot.activateUpgrade("Fast Disc");
   robot.activateUpgrade("Disc Bounce 3");
   robot.activateUpgrade("Extended Laser 1");
@@ -303,13 +323,13 @@ public void setupTestingStuff()
   //movers.get( movers.size()-1 ).xPos = 400;
   //movers.get( movers.size()-1 ).yPos = 700;
   
-  //movers.add( new Enemy( new VampireBehavior(), robot, 1 ) );
-  //movers.get( movers.size()-1 ).xPos = 400;
-  //movers.get( movers.size()-1 ).yPos = 800;
-  
-  movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
+  movers.add( new Enemy( new VampireBehavior(), robot, 1 ) );
   movers.get( movers.size()-1 ).xPos = 400;
-  movers.get( movers.size()-1 ).yPos = 900;
+  movers.get( movers.size()-1 ).yPos = 800;
+  
+  //movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 900;
   
   //movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
   //movers.get( movers.size()-1 ).xPos = 1200;
@@ -319,17 +339,17 @@ public void setupTestingStuff()
   //movers.get( movers.size()-1 ).xPos = 1200;
   //movers.get( movers.size()-1 ).yPos = 600;
   
-  //movers.add( new Enemy( new LichBehavior(), robot, 1 ) );
-  //movers.get( movers.size()-1 ).xPos = 1200;
-  //movers.get( movers.size()-1 ).yPos = 900;
+  movers.add( new Enemy( new LichBehavior(), robot, 1 ) );
+  movers.get( movers.size()-1 ).xPos = 1200;
+  movers.get( movers.size()-1 ).yPos = 900;
   
   //movers.add( new Enemy( new MonsterBehavior(), robot, 1 ) );
   //movers.get( movers.size()-1 ).xPos = 1200;
   //movers.get( movers.size()-1 ).yPos = 1200;
   
-  //movers.add( new Enemy( new MageBehavior(), robot, 1 ) );
-  //movers.get( movers.size()-1 ).xPos = 1200;
-  //movers.get( movers.size()-1 ).yPos = 1050;
+  movers.add( new Enemy( new MageBehavior(), robot, 1 ) );
+  movers.get( movers.size()-1 ).xPos = 1200;
+  movers.get( movers.size()-1 ).yPos = 1050;
   
   //testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
   //testWheel.addUpgrade( new Upgrade("Piercing Laser") );

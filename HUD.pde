@@ -6,13 +6,30 @@ class HUD
   
   int installBoxOffset = -55;
   boolean installBoxOpening = false;
+  boolean installBoxClosing = false;
+  
+  boolean staticScreen;
+  boolean secure;
   
   int commsBoxOffset = -height;
   boolean commsBoxOpening = false;
   String [] commsBoxText;
-  String currentText = ""; //For displaying text
-  int currentIndex;        //one character at a time.
-  int nextLetterTime;
+  String currentText = "";      //For displaying text
+  int currentIndex[] = {0,0,0}; //one character at a time.
+  int nextLetterTime[] = {0,0,0};
+  
+  String name = "Dr. R Bennett";
+  String name_current = "";
+  String addr = "24.153.111.148";
+  String addr_current = "";
+  
+  int bankedDiscs;
+  int nextUpgrade = 100;
+  
+  boolean bankingDiscs;
+  
+  boolean startingNextLevel;
+  int nextLevelDelay = 0;
   
   HUD()
   {
@@ -47,6 +64,74 @@ class HUD
     
     //Install Box
     drawInstallBox();
+    
+    //Switch mode after banking discs
+    checkNextLevelStart();
+    
+    //TESTING
+    //fill(255);
+    //text(robot.cash,200,200);
+    //text(bankedDiscs,200,400);
+    //text("Banking: " + bankingDiscs,200,500);
+    //text("Start Next: " + startingNextLevel,200,600);
+    //text("Offset: " + installBoxOffset,200,700);
+  }
+  
+  public void reset()
+  {
+    currentIndex[0] = 0;
+    currentIndex[1] = 0;
+    currentIndex[2] = 0;
+    nextLetterTime[0] = 0;
+    nextLetterTime[1] = 0;
+    nextLetterTime[2] = 0;
+    currentText = "";
+    name_current = "";
+    addr_current = "";
+    installBoxOffset = -55;
+    nextLevelDelay = 0;
+    startingNextLevel = false;
+  }
+  
+  private void checkNextLevelStart()
+  {
+    if( !bankingDiscs && !startingNextLevel && installBoxOffset >= 0 )
+    {
+      bankingDiscs = true;
+    }
+    else if( bankingDiscs )
+    {
+      if( robot.cash > 0 )
+      {
+        bankedDiscs++;
+        robot.cash--;
+      }
+      if( robot.cash == 0 )
+        checkForExtraSpin();
+    }
+    else if( startingNextLevel && millis() > nextLevelDelay )
+    {
+      reset();
+      manager.goToSurvival();
+    }
+  }
+  
+  private void checkForExtraSpin()
+  {
+    bankingDiscs = false;
+    if( bankedDiscs >= nextUpgrade )
+    {
+      bankedDiscs -= nextUpgrade;
+      nextUpgrade += 100;
+      installBoxClosing = true;
+      testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
+      new GhostWords("Extra Upgrade Unlocked",width*2/3, height-150);
+    }
+    else
+    {
+      startingNextLevel = true;
+      nextLevelDelay = millis() + 2000;
+    }
   }
   
   private void drawInstallBox()
@@ -54,12 +139,16 @@ class HUD
     if( installBoxOpening )
     {
       if( installBoxOffset >= 0 )
-      {
         installBoxOpening = false;
-        manager.goToSurvival();
-      }
       else
         installBoxOffset++;
+    }
+    if( installBoxClosing )
+    {
+      if( installBoxOffset <= -55 )
+        installBoxClosing = false;
+      else
+        installBoxOffset--;
     }
     
     String installString = upgradeString + ": INSTALLED";
@@ -124,8 +213,13 @@ class HUD
     {
       push();
       translate(215,(100+commsBoxOffset)+370/2);
-      rotate(millis()%4*HALF_PI);
-      image(staticPic,0,0);
+      if( millis()%(20+mapLevel*5) == 0 || staticScreen ) //get less static-y as level goes up (closer to source)
+      {
+        rotate(millis()%4*HALF_PI);
+        image(staticPic,0,0);
+      }
+      else
+        image(facePic,0,0);
       pop();
     }
     
@@ -155,12 +249,49 @@ class HUD
     rectMode(CORNER);
     if(!commsBoxOpening)
     {
-      if( currentIndex < commsBoxText[0].length() && millis() > nextLetterTime )
+      if( currentIndex[0] < commsBoxText[0].length() && millis() > nextLetterTime[0] )
       {
-        nextLetterTime = millis() + 50; //Time between letters
-        currentText += commsBoxText[0].charAt(currentIndex++);
+        nextLetterTime[0] = millis() + 50; //Time between letters
+        currentText += commsBoxText[0].charAt(currentIndex[0]++);
       }
       text(currentText, 20, 570+commsBoxOffset, 750,1000);
+    }
+    pop();
+    
+    //Info boxes
+    push();
+    rectMode(CORNER);
+    stroke(100);
+    strokeWeight(5);
+    fill(0,20,0);
+    rect(470,120+commsBoxOffset,290,70);
+    rect(470,260+commsBoxOffset,290,70);
+    rect(470,400+commsBoxOffset,290,70);
+    
+    
+    textSize(25);
+    fill(50,200,50,200);
+    textAlign(LEFT);
+    if( !commsBoxOpening )
+    { 
+      if( currentIndex[1] < name.length() && millis() > nextLetterTime[1] )
+      {
+        nextLetterTime[1] = millis() + 50; //Time between letters
+        name_current += name.charAt(currentIndex[1]++);
+      }
+      text("User ID:\n"+name_current,480,150+commsBoxOffset);
+      
+      if( currentIndex[2] < name.length() && millis() > nextLetterTime[2] )
+      {
+        nextLetterTime[2] = millis() + 50; //Time between letters
+        addr_current += addr.charAt(currentIndex[2]++);
+      }
+      text("IP ADDR:\n"+addr_current,480,290+commsBoxOffset);
+
+      textSize(30);
+      text(": " + bankedDiscs + "/" + nextUpgrade,530,445+commsBoxOffset);
+      tint(150,250,150);
+      image(floppy,505,435+commsBoxOffset);
     }
     pop();
   }
@@ -177,8 +308,8 @@ class HUD
     textAlign(RIGHT);
     textSize(30);
     fill(0);
-    //text(robot.cash + " :",width-53,33);
-    text(8888 + " :",width-53,33);
+    text(robot.cash + " :",width-53,33);
+    //text(8888 + " :",width-53,33);
     pop();
   }
   

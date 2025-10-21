@@ -1,7 +1,7 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,facePic;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
-PImage fireball, fireCharge, voice, brainBlast;
+PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
 
 HashMap<String, PImage> upgradeImages = new HashMap<>();
 
@@ -31,9 +31,11 @@ class GameData
     floppy = loadImage("floppy.png");
     floppy.resize(30,0);
     
-    //Static
+    //Static/Face
     staticPic = loadImage("static.png");
     staticPic.resize(370,0);
+    facePic = loadImage("scientist.png");
+    facePic.resize(366,0);
     
     //Shield
     shieldPic = loadImage("shield.png");
@@ -147,10 +149,13 @@ class GameData
     bolt = loadImage("bolt.png"); bolt.resize(missileSize,0);
     laserImage = loadImage("laser.png"); laserImage.resize(missileSize,0);
     explosionSmall = loadImage("boom.png"); explosionSmall.resize(missileSize,0);
+    skull = loadImage("skull.png"); skull.resize(missileSize*2,0);
     
     fireball = loadImage("FireBall.png"); fireball.resize(missileSize,0);
     fireCharge = loadImage("fireCharge.png"); fireCharge.resize(missileSize,0);
     voice = loadImage("voice.png"); voice.resize(missileSize*2,0);
     brainBlast = loadImage("brainBlast.png"); brainBlast.resize(missileSize*2,0);
+    bat = new PImage[] { loadImage("bat1.png"), loadImage("bat2.png") };
+    bat[0].resize(int(missileSize*1.5),0); bat[1].resize(int(missileSize*1.5),0);
   }
 }

@@ -50,7 +50,7 @@ class Remnant extends MovingThing
     fadeSpeed = 2;
     grows = false;
     
-    movers.add(this);
+    trails.add(this);
   }
   
   Remnant( MovingThing m )
@@ -114,7 +114,7 @@ class Remnant extends MovingThing
   
   public void show()
   {
-    println("SHOW!!!");
+    //println("SHOW!!!");
     
     if(finished) return;
     

@@ -76,13 +76,13 @@ class SurvivalState implements GameState
   {
     background(0);
     
-    testMap.drawBlocks(robot,0);
-    testMap.drawBlocks(robot,1);
+    map.drawBlocks(robot,0);
+    map.drawBlocks(robot,1);
     showAllMovers();
-    testMap.drawBlocks(robot,2);
+    map.drawBlocks(robot,2);
     
-    if(testMap.exiting)
-      testMap.lowerExit();
+    if(map.exiting)
+      map.lowerExit();
     else
     {
       moveAllMovers();
@@ -92,14 +92,14 @@ class SurvivalState implements GameState
       //robot.activate();
     }
     
-    if( testMap.fade >= 255 )
+    if( map.fade >= 255 )
     {
-      testMap = new Map(++testMapLevel);
+      map = new Map(++mapLevel);
       
       manager.goToUpgrade();
     
-      robot.xPos = testMap.startingPoint('x');
-      robot.yPos = testMap.startingPoint('y');
+      robot.xPos = map.startingPoint('x');
+      robot.yPos = map.startingPoint('y');
     }
     
     hud.display(false);

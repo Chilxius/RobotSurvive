@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash;
+  int cash = 450;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -52,7 +52,7 @@ class Robot extends MovingThing
   public void show()
   {
     //showDirectionDisplay();
-    if(!testMap.exiting)
+    if(!map.exiting)
       recordAndDrawPointers();
     cosmetics.display(xPos+data.xOffset,yPos+data.yOffset);
     //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
@@ -175,8 +175,8 @@ class Robot extends MovingThing
   
   private void checkForExit()
   {
-    if( dist( xPos, yPos, testMap.exitX, testMap.exitY-data.blockSize/3 ) < data.blockSize/2+data.playerHitBox/2 )
-      testMap.exiting = true;
+    if( dist( xPos, yPos, map.exitX, map.exitY-data.blockSize/3 ) < data.blockSize/2+data.playerHitBox/2 )
+      map.exiting = true;
   }
   
   public void setPosition( float x, float y )

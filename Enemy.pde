@@ -10,6 +10,7 @@ class Enemy extends MovingThing
   float opacity; //for fading out once dead
   
   int nextShot;
+  int nextTrail;
   
   EnemyBehavior behavior;
   
@@ -26,6 +27,7 @@ class Enemy extends MovingThing
     opacity = 255;
     
     nextShot = int(random(behavior.shotDelay));
+    nextTrail = behavior.trailDelay;
     
     //if(behavior.boss)
     //{
@@ -142,8 +144,11 @@ class Enemy extends MovingThing
       {
         nextShot = millis() + behavior.shotDelay;
         
-        if( behavior instanceof MummyBehavior ) new Fireball(this);
-        if( behavior instanceof BansheeBehavior ) new BrainBlast(this);//for( int i = 0; i < 8; i++ ) new Voice(this,i);
+        if( behavior instanceof MummyBehavior )   new Fireball(this);
+        if( behavior instanceof BansheeBehavior ) for( int i = 0; i < 8; i++ ) new Voice(this,i);
+        if( behavior instanceof BrainBehavior )   new BrainBlast(this);
+        if( behavior instanceof LichBehavior )    new Skull(this);
+        if( behavior instanceof VampireBehavior ) new Bat(this);
       }
     }
   }
@@ -179,6 +184,7 @@ abstract class EnemyBehavior
   //Shoots (and keeps distance)
   boolean ranged;
   int shotDelay;
+  int trailDelay;
   
   float speedMultiplier;
   float friction;
@@ -329,14 +335,16 @@ class VampireBehavior extends EnemyBehavior
     maxHealth = 40;
   
     corporeal = true;
-    ranged = false;
-    speedMultiplier = 0.020;
+    ranged = true;
+    shotDelay = 2000;
+    speedMultiplier = 0.050;
     friction = 0.95;
     sightRange = 7;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    trailDelay = 200;
     
     name = "Vampire";
   }
@@ -413,7 +421,8 @@ class BrainBehavior extends EnemyBehavior
   
     boss = true;
     corporeal = true;
-    ranged = false;
+    ranged = true;
+    shotDelay = 1000;
     speedMultiplier = 0.020;
     friction = 0.95;
     sightRange = 7;
@@ -434,7 +443,8 @@ class LichBehavior extends EnemyBehavior
   
     boss = true;
     corporeal = true;
-    ranged = false;
+    ranged = true;
+    shotDelay = 2000;
     speedMultiplier = 0.020;
     friction = 0.95;
     sightRange = 7;
@@ -456,13 +466,14 @@ class MageBehavior extends EnemyBehavior
     boss = true;
     corporeal = true;
     ranged = false;
-    speedMultiplier = 0.020;
+    speedMultiplier = 0.06;
     friction = 0.95;
     sightRange = 7;
     
     step = 1;
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
+    trailDelay = 300;
     
     name = "Mage";
   }
