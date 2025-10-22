@@ -1,4 +1,4 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,facePic;
+PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,bigFacePic;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
@@ -34,8 +34,8 @@ class GameData
     //Static/Face
     staticPic = loadImage("static.png");
     staticPic.resize(370,0);
-    facePic = loadImage("scientist.png");
-    facePic.resize(366,0);
+    bigFacePic = loadImage("scientist.png");
+    bigFacePic.resize(366,0);
     
     //Shield
     shieldPic = loadImage("shield.png");

@@ -101,12 +101,12 @@ class HUD
     }
     else if( bankingDiscs )
     {
-      if( robot.cash > 0 )
+      if( robot.cash > 0 && bankedDiscs < nextUpgrade)
       {
         bankedDiscs++;
         robot.cash--;
       }
-      if( robot.cash == 0 )
+      else// if( robot.cash == 0 )
         checkForExtraSpin();
     }
     else if( startingNextLevel && millis() > nextLevelDelay )
@@ -219,7 +219,7 @@ class HUD
         image(staticPic,0,0);
       }
       else
-        image(facePic,0,0);
+        image(bigFacePic,0,0);
       pop();
     }
     

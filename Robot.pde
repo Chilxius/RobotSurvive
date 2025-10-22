@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash = 450;
+  int cash = 9999;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -56,7 +56,7 @@ class Robot extends MovingThing
     //showDirectionDisplay();
     if(!map.exiting)
       recordAndDrawPointers();
-    cosmetics.display(xPos+data.xOffset,yPos+data.yOffset);
+    cosmetics.display(xPos+data.xOffset,yPos+data.yOffset,iFrames>millis());
     //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
     if( shield > 0 )
       drawShield();
@@ -516,7 +516,7 @@ class CosmeticKit
     sounds = matchingSoundPack( name, this.parent );
   }
   
-  void display( float x, float y )
+  void display( float x, float y, boolean sad )
   {
     push();
   
@@ -529,7 +529,8 @@ class CosmeticKit
     //if(keyPressed) image(facePic2,0,0);
     //else           image(facePic,0,0);
     
-    image(facePic,0,0);
+    if( sad ) image(facePic2,0,0);
+    else      image(facePic,0,0);
     
     pop();
   }
@@ -568,9 +569,9 @@ class TestDecorator extends CosmeticDecorator
     upgradePic = loadImage("testArmUpgrade.png"); upgradePic.resize(int(data.playerSize),0);
   }
   
-  void display( float x, float y )
+  void display( float x, float y, boolean s )
   {
-    kit.display(x,y);
+    kit.display(x,y,s);
     image(upgradePic,x,y);
   }
 }

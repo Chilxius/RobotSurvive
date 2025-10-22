@@ -178,13 +178,15 @@ class ChoiceWheel
   public void buildWheel( int items )
   {
     Upgrade chunks[] = {null,null,null,null};
-    Node nodeRefs[] = {null,null,null,null};
+    Node nodeRefs[] =  {null,null,null,null};
     for( int i = 0; i < items; i++ )
     {
       boolean keepLooking = true;
+      int searches = 0; //after 100 searches, will allow duplicates
       
       while( chunks[i] == null || keepLooking ) //Keep trying until a legitimate upgrade is found
       {
+        searches++;
         
         Node<Upgrade> current = upgradeTree.children.get( int(random(upgradeTree.children.size())));
         
@@ -210,32 +212,30 @@ class ChoiceWheel
             current = current.right;
         }
       
-        ////Avoid duplicates and null values
-        //for(int j = 0; j < chunks.length; j++ )
-        //  if( i != j && chunks[i] != null && chunks[j] != null && chunks[i].name.equals(chunks[j].name) )
-        //    keepLooking = true;
-        //  else
-        //    keepLooking = false;
+        //Avoid duplicates
         
-        //FIXED - AI help
-        boolean duplicateFound = false;
-        for (int j = 0; j < chunks.length; j++)
+        if( searches < 100 )
         {
-            if (i != j && chunks[i] != null && chunks[j] != null &&
-                chunks[i].name.equals(chunks[j].name))
-            {
-                duplicateFound = true;
-                break;
-            }
+          boolean duplicateFound = false;
+          for (int j = 0; j < chunks.length; j++)
+          {
+              if (i != j && chunks[i] != null && chunks[j] != null &&
+                  chunks[i].name.equals(chunks[j].name))
+              {
+                  duplicateFound = true;
+                  break;
+              }
+          }
+          keepLooking = duplicateFound;
         }
-        keepLooking = duplicateFound;
+        else
+          keepLooking = false;
       }
     }
-    //for( Upgrade u: chunks )
+    
     for( Node n: nodeRefs )
     {
       segments.add( n );
-      //println( n.value.name );
     }
   }
 }

@@ -22,6 +22,7 @@
 //Keep discs from getting stuck in walls
 //Decorate upgrade wheel
 //Keep robot from getting stuck on walls when bumped
+//Little longer wait before banking discs
 
 import processing.sound.*;
 import java.util.Collections;
@@ -321,13 +322,13 @@ public void setupTestingStuff()
   //robot.activateUpgrade("Disc Bounce 3");
   //robot.activateUpgrade("Extended Laser 1");
   //robot.activateUpgrade("Tunneling Laser");
-  robot.activateUpgrade("Magnet 2");
+  //robot.activateUpgrade("Magnet 2");
   //robot.activateUpgrade("Knockback Resist");
-  robot.activateUpgrade("Forceful Pushback");
+  //robot.activateUpgrade("Forceful Pushback");
   
   movers.add(robot);
   
-  testEnemy = new Enemy( new VampireBehavior(), robot, 1 );
+  testEnemy = new Enemy( new ZombieBehavior(), robot, 1 );
   testEnemy.xPos = 500;
   testEnemy.yPos = 1300;
   
