@@ -7,6 +7,8 @@ public abstract class MovingThing
   
   boolean finished;
   
+  float bumpX, bumpY; //speed additions for getting "bumped"
+  
   abstract public void move();
   abstract public void show();
   abstract public boolean checkExpiration(); //May not need to be boolean anymore
@@ -86,6 +88,18 @@ public abstract class MovingThing
       return yPos+size/3;
     else
       return yPos;
+  }
+  
+  public void getPushed( int amount )
+  {
+    float pushAngle = atan2(yPos-robot.yPos,xPos-robot.xPos);
+    bumpX = cos(pushAngle) * amount;
+    bumpY = sin(pushAngle) * amount;
+  }
+  
+  //For inherited items
+  public void takeDamage( int x )
+  {
   }
   
   //public boolean inBlock( Block b )

@@ -43,7 +43,6 @@ class ChoiceWheel
   {
     push();
     translate(xPos,yPos);
-    rotate(angle);
     
     float chunks = segments.size();
     float size = TWO_PI/chunks;
@@ -53,7 +52,15 @@ class ChoiceWheel
     //int index = int(((TWO_PI - (angle % TWO_PI)) / size) % segments.size());
     
     //background( segments.get( int(((TWO_PI - (angle % TWO_PI)) / size) % segments.size()) ).segmentColor );
-      
+    
+    fill(100);
+    noStroke();
+    circle(0,0,wheelSize+30);
+    rectMode(CENTER);
+    rect(0,0,100,height);
+    rect(500,0,1000,100);
+    
+    rotate(angle);
     for(int i = 0; i < chunks; i++)
     {
       fill(segments.get(i).value.segmentColor);

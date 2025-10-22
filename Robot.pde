@@ -29,6 +29,8 @@ class Robot extends MovingThing
   int shield;
   int nextShieldRegen;
   
+  int iFrames;
+  
   public Robot( String name, PApplet parent )
   {
     cosmetics = new CosmeticKit( name, parent );
@@ -71,22 +73,22 @@ class Robot extends MovingThing
     
     if( turning && upgrades.get("Turn-Stop") )
     {
-      //don't move
+      xPos += bumpX;
+      yPos += bumpY;
     }
     else if( turning && upgrades.get("Turn-Slow") )
     {
-      xPos += xSpd/2;
-      yPos += ySpd/2;
+      xPos += xSpd/2+bumpX;
+      yPos += ySpd/2+bumpY;
     }
     else
     {
-      xPos += xSpd;
-      yPos += ySpd;
+      xPos += xSpd+bumpX;
+      yPos += ySpd+bumpY;
     }
     
-    
-    //xSpd *= .95;
-    //ySpd *= .95;
+    bumpX *= 0.95;
+    bumpY *= 0.95;
     
     checkForScroll();
     
@@ -137,8 +139,8 @@ class Robot extends MovingThing
   {
     //Go back a step to avoid phasing through the block partially before
     //  determining direction of bounce
-    xPos -= xSpd;
-    yPos -= ySpd;
+    xPos -= xSpd+bumpX*2;
+    yPos -= ySpd+bumpY*2;
     
     if(abs(xPos - b.xPos) > abs(yPos - b.yPos)) //horizontal
     {
@@ -156,6 +158,60 @@ class Robot extends MovingThing
       ySpd = -ySpd;
       angle += PI;
     }
+  }
+  
+  public void getHitBy( Enemy e )
+  {
+    if( iFrames > millis() ) return;
+    
+    //Get pushed
+    float pushAngle = atan2(yPos-e.yPos,xPos-e.xPos);
+    bumpX = cos(pushAngle) * bumpSpeed();
+    bumpY = sin(pushAngle) * bumpSpeed();
+    
+    //Take damage
+    takeDamage( e.damage );
+    
+    iFrames = millis() + 1000;
+  }
+  
+  public void takeDamage( int d )
+  {
+    if( shield > 0 )
+      shield--;
+    else
+    {
+      armor -= d;
+      if( armor <= 0 )
+      {
+        //DEAD - go to BREAKDOWN
+      }
+    }
+  }
+  
+  private int bumpSpeed()
+  {
+    if( upgrades.get("Pushback") || upgrades.get("Forceful Pushback") )
+      return 1;
+    else if( upgrades.get("Knockback Resist") )
+      return 5;
+    else
+      return 10;
+  }
+  
+  public int missileDamage()
+  {
+    return 1;
+  }
+  
+  public int discDamage()
+  {
+    return 1;
+  }
+  
+  public int laserDamage()
+  {
+    return 1;
   }
   
   public void checkForScroll()

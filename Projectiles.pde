@@ -7,9 +7,12 @@ class Missile extends MovingThing implements Projectile
   Enemy target;
   
   int expiration;
+  int damage;
   
-  Missile( Robot r )
+  Missile( Robot r, int damage )
   {
+    this.damage = damage;
+    
     xPos = r.xPos-data.playerHitBox; //offset to left hand (where launcher is)
     yPos = r.yPos;
     
@@ -92,9 +95,12 @@ class Disc extends MovingThing
 {
   //int expiration;
   boolean step;
+  int damage;
   
-  Disc( Robot r )
+  Disc( Robot r, int damage )
   {
+    this.damage = damage;
+    
     xPos = r.xPos;
     yPos = r.yPos;
     

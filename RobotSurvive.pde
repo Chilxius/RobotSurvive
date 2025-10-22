@@ -1,11 +1,9 @@
 //Game Jam Challenge: One Button
 //Robots vs Vampires
 
-//NEXT: Get floppys to transfer
-//      Add text for scientist name, ip, collected floppys
+//NEXT: 
 //      Get enemies to shove robot
 //      Have upgrades do their effect
-//      Make level start better
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
@@ -21,6 +19,9 @@
 //Sound
 //Final cinematic
 //Opening cinematic
+//Keep discs from getting stuck in walls
+//Decorate upgrade wheel
+//Keep robot from getting stuck on walls when bumped
 
 import processing.sound.*;
 import java.util.Collections;
@@ -117,6 +118,7 @@ void draw()
   //text(projectiles.size()+"",100,100);
   //text(movers.size()+"",100,200);
 
+  text( testEnemy.health, 500, 500);
 }
 
 public void handleGhostWords()
@@ -137,6 +139,7 @@ public void handleGhostWords()
 //Got help from ChatGPT - this shoud work unless there are thousands of objects
 public void showAllMovers()
 {
+  //Vampire trails
   for( MovingThing m: trails )
     m.show();
     
@@ -155,6 +158,7 @@ public void showAllMovers()
 
 public void moveAllMovers()
 {
+  //Vampire trails
   for( MovingThing m: trails )
     m.move();
     
@@ -162,14 +166,14 @@ public void moveAllMovers()
   {
     m.move();
     
+    //Handle incorporeal enemies
     if( m instanceof Enemy )
     {
       Enemy e = (Enemy) m;
-      
-      if( !e.behavior.corporeal )
-        continue;
+      if( !e.behavior.corporeal ) continue;
     }
     
+    //Enemies push each other around
     for( int i = 0; i < movers.size(); i++ )
     {
       if( m instanceof Enemy && movers.get(i) != m && movers.get(i) instanceof Enemy && dist( m.xPos, m.yPos, movers.get(i).xPos, movers.get(i).yPos ) < (movers.get(i).size+m.size)/2 )
@@ -209,12 +213,32 @@ public void checkAllShooters()
 
 public void checkAllMoversForHits()
 {
-  //Robot, pickups, projectiles, enemies, dangers( bad projectiles)
+  //Robot, pickups, projectiles, enemies, dangers(bad projectiles)
   for( int i = 0; i < movers.size(); i++ )
   {
-    for( int j = i+1; j < movers.size(); j++ )
+    for( int j = 0; j < movers.size(); j++ )
     {
+      if( i == j ) continue;
       
+      //*********************
+      // Robot interactions
+      if( movers.get(i) instanceof Robot )
+      {
+        //Grab disc
+        if( movers.get(j) instanceof Pickup && movers.get(i).intersects(movers.get(j)) )
+        {
+          robot.cash++;
+          movers.get(j).finished=true;
+        }
+        //Hit by enemy
+        else if( movers.get(j) instanceof Enemy && movers.get(i).intersects(movers.get(j)) )
+        {
+          movers.get(j).getPushed(10-robot.bumpSpeed());
+          if( robot.upgrades.get("Forceful Pushback") )
+            movers.get(j).takeDamage(int(robot.adjustedSpeed()*3));
+          robot.getHitBy( (Enemy) movers.get(j) );
+        }
+      }
     }
   }
 }
@@ -254,13 +278,16 @@ public void keyPressed()
 {
   manager.reactToPress();
   if( key == 'm' )
-    new Missile(robot);
+    new Missile(robot,robot.missileDamage());
   if( key == 'd' )
-    new Disc(robot);
+    new Disc(robot,robot.discDamage());
   if( key == 'k' )
+  {
     testEnemy.dead = true;
+    new Pickup(testEnemy);
+  }
   if( key == 'l' )
-    new Laser(robot);
+    new Laser(robot,robot.laserDamage());
   if( key == '1' )
     robot.activateUpgrade("Armor Up 1");
   if( key == '2' )
@@ -278,7 +305,7 @@ public void keyPressed()
   if( key == 'x' )
     robot.activateUpgrade("Blast Radius 2");
   if( key == 'f' )
-    new Fireball(testEnemy);
+    new Fireball(testEnemy, testEnemy.damage);
 }
 
 public void keyReleased()
@@ -288,16 +315,19 @@ public void keyReleased()
 
 public void setupTestingStuff()
 {  
-  robot.activateUpgrade("Movement Speed 4");
-  robot.activateUpgrade("Rotation Speed 3");
-  robot.activateUpgrade("Fast Disc");
-  robot.activateUpgrade("Disc Bounce 3");
-  robot.activateUpgrade("Extended Laser 1");
-  robot.activateUpgrade("Tunneling Laser");
+  //robot.activateUpgrade("Movement Speed 4");
+  //robot.activateUpgrade("Rotation Speed 3");
+  //robot.activateUpgrade("Fast Disc");
+  //robot.activateUpgrade("Disc Bounce 3");
+  //robot.activateUpgrade("Extended Laser 1");
+  //robot.activateUpgrade("Tunneling Laser");
+  robot.activateUpgrade("Magnet 2");
+  //robot.activateUpgrade("Knockback Resist");
+  robot.activateUpgrade("Forceful Pushback");
   
   movers.add(robot);
   
-  testEnemy = new Enemy( new MummyBehavior(), robot, 1 );
+  testEnemy = new Enemy( new VampireBehavior(), robot, 1 );
   testEnemy.xPos = 500;
   testEnemy.yPos = 1300;
   
@@ -323,9 +353,9 @@ public void setupTestingStuff()
   //movers.get( movers.size()-1 ).xPos = 400;
   //movers.get( movers.size()-1 ).yPos = 700;
   
-  movers.add( new Enemy( new VampireBehavior(), robot, 1 ) );
-  movers.get( movers.size()-1 ).xPos = 400;
-  movers.get( movers.size()-1 ).yPos = 800;
+  //movers.add( new Enemy( new VampireBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 400;
+  //movers.get( movers.size()-1 ).yPos = 800;
   
   //movers.add( new Enemy( new BansheeBehavior(), robot, 1 ) );
   //movers.get( movers.size()-1 ).xPos = 400;
@@ -339,17 +369,17 @@ public void setupTestingStuff()
   //movers.get( movers.size()-1 ).xPos = 1200;
   //movers.get( movers.size()-1 ).yPos = 600;
   
-  movers.add( new Enemy( new LichBehavior(), robot, 1 ) );
-  movers.get( movers.size()-1 ).xPos = 1200;
-  movers.get( movers.size()-1 ).yPos = 900;
+  //movers.add( new Enemy( new LichBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 900;
   
   //movers.add( new Enemy( new MonsterBehavior(), robot, 1 ) );
   //movers.get( movers.size()-1 ).xPos = 1200;
   //movers.get( movers.size()-1 ).yPos = 1200;
   
-  movers.add( new Enemy( new MageBehavior(), robot, 1 ) );
-  movers.get( movers.size()-1 ).xPos = 1200;
-  movers.get( movers.size()-1 ).yPos = 1050;
+  //movers.add( new Enemy( new MageBehavior(), robot, 1 ) );
+  //movers.get( movers.size()-1 ).xPos = 1200;
+  //movers.get( movers.size()-1 ).yPos = 1050;
   
   //testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
   //testWheel.addUpgrade( new Upgrade("Piercing Laser") );

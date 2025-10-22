@@ -80,6 +80,7 @@ class SurvivalState implements GameState
     map.drawBlocks(robot,1);
     showAllMovers();
     map.drawBlocks(robot,2);
+    checkAllMoversForHits();
     
     if(map.exiting)
       map.lowerExit();

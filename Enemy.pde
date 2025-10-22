@@ -5,6 +5,8 @@ class Enemy extends MovingThing
 {
   int level;
   
+  int damage;
+  int projectileDamage;
   float health;
   boolean dead;
   float opacity; //for fading out once dead
@@ -28,6 +30,8 @@ class Enemy extends MovingThing
     
     nextShot = int(random(behavior.shotDelay));
     nextTrail = behavior.trailDelay;
+    
+    damage = behavior.damage;
     
     //if(behavior.boss)
     //{
@@ -97,8 +101,8 @@ class Enemy extends MovingThing
       }
     }
     
-    xPos += xSpd;
-    yPos += ySpd;
+    xPos += xSpd+bumpX;
+    yPos += ySpd+bumpY;
   
     xSpd *= behavior.friction;
     ySpd *= behavior.friction;
@@ -106,6 +110,9 @@ class Enemy extends MovingThing
     if( (millis()+behavior.stepOffset) % behavior.stepSpeed < behavior.stepSpeed/2 )
       behavior.step = 1;
     else behavior.step = 2;
+    
+    bumpX *=.8;
+    bumpY *=.8;
   }
   
   public void show()
@@ -144,11 +151,11 @@ class Enemy extends MovingThing
       {
         nextShot = millis() + behavior.shotDelay;
         
-        if( behavior instanceof MummyBehavior )   new Fireball(this);
-        if( behavior instanceof BansheeBehavior ) for( int i = 0; i < 8; i++ ) new Voice(this,i);
-        if( behavior instanceof BrainBehavior )   new BrainBlast(this);
-        if( behavior instanceof LichBehavior )    new Skull(this);
-        if( behavior instanceof VampireBehavior ) new Bat(this);
+        if( behavior instanceof MummyBehavior )   new Fireball(this,projectileDamage);
+        if( behavior instanceof BansheeBehavior ) for( int i = 0; i < 8; i++ ) new Voice(this,projectileDamage,i);
+        if( behavior instanceof BrainBehavior )   new BrainBlast(this,projectileDamage);
+        if( behavior instanceof LichBehavior )    new Skull(this,projectileDamage);
+        if( behavior instanceof VampireBehavior ) new Bat(this,projectileDamage);
       }
     }
   }
@@ -161,6 +168,7 @@ class Enemy extends MovingThing
   public void takeDamage( int amount )
   {
     health -= amount;
+    new GhostWords( amount, xPos, yPos );
     if( health < 0 )
       dead = true;
   }
@@ -171,9 +179,16 @@ class Enemy extends MovingThing
     {
       finished = true;
       new Remnant(this);
+      dropPickups();
       return true;
     }
     return false;
+  }
+  
+  private void dropPickups()
+  {
+    for( int i = 0; i < behavior.drops; i++ )
+      new Pickup(this);
   }
 }
 
@@ -205,6 +220,10 @@ abstract class EnemyBehavior
   PImage picture2;
   PImage pictureX;
   
+  int damage;
+  
+  int drops;
+  
   boolean boss;
 }
 
@@ -222,6 +241,8 @@ class GhostBehavior extends EnemyBehavior
     
     step = 1;
     stepSpeed = 2000;
+    
+    drops = 1;
     
     name = "Ghost";
   }
@@ -243,6 +264,8 @@ class ZombieBehavior extends EnemyBehavior
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
+    drops = 1;
+    
     name = "Zombie";
   }
 }
@@ -262,6 +285,8 @@ class SkeletonBehavior extends EnemyBehavior
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    
+    drops = int(random(2))+1;
     
     name = "Skeleton";
   }
@@ -283,6 +308,8 @@ class RatBehavior extends EnemyBehavior
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
+    drops = int(random(2));
+    
     name = "Rat";
   }
 }
@@ -302,6 +329,8 @@ class GhoulBehavior extends EnemyBehavior
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    
+    drops = int(random(4))+1;
     
     name = "Ghoul";
   }
@@ -324,6 +353,8 @@ class MummyBehavior extends EnemyBehavior
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
+    drops = int(random(2))+2;
+    
     name = "Mummy";
   }
 }
@@ -333,6 +364,8 @@ class VampireBehavior extends EnemyBehavior
   VampireBehavior()
   {
     maxHealth = 40;
+    
+    damage = 2;
   
     corporeal = true;
     ranged = true;
@@ -345,6 +378,8 @@ class VampireBehavior extends EnemyBehavior
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     trailDelay = 200;
+    
+    drops = int(random(2,8));
     
     name = "Vampire";
   }
@@ -365,6 +400,8 @@ class WraithBehavior extends EnemyBehavior
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    
+    drops = int(random(5));
     
     name = "Wraith";
   }
@@ -388,6 +425,8 @@ class BansheeBehavior extends EnemyBehavior
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
+    drops = int(random(10))+20;
+    
     name = "Banshee";
   }
 }
@@ -408,6 +447,8 @@ class MonsterBehavior extends EnemyBehavior
     step = 1;
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
+    
+    drops = int(random(30))+25;
     
     name = "BoneMonster";
   }
@@ -431,6 +472,8 @@ class BrainBehavior extends EnemyBehavior
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
+    drops = int(random(15,30))+45;
+    
     name = "Brain";
   }
 }
@@ -453,6 +496,8 @@ class LichBehavior extends EnemyBehavior
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
+    drops = int(random(20))+75;
+    
     name = "Lich";
   }
 }
@@ -474,6 +519,8 @@ class MageBehavior extends EnemyBehavior
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     trailDelay = 300;
+    
+    drops = 150;
     
     name = "Mage";
   }

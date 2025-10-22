@@ -14,7 +14,7 @@ class Laser extends MovingThing
   int steps;
   color lazColor;
   
-  Laser( Robot r )
+  Laser( Robot r, int damage )
   {
     //Range changes with upgrades
     steps = stepCount(r);
