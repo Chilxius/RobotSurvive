@@ -21,11 +21,11 @@ class GhostWords
   GhostWords( int i, float x, float y )
   {
     words = ""+i;
-    xPos = x;
-    yPos = y;
+    xPos = x + random(-data.enemyBaseSize/3,data.enemyBaseSize/3);
+    yPos = y + random(-data.enemyBaseSize/3,data.enemyBaseSize/3);
     size = 50;
     timer = millis()+1000;
-    col = color(0);
+    col = color(255);
     
     ghostWords.add(this);
   }

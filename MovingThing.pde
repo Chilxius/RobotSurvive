@@ -9,6 +9,8 @@ public abstract class MovingThing
   
   float bumpX, bumpY; //speed additions for getting "bumped"
   
+  int damage;
+  
   abstract public void move();
   abstract public void show();
   abstract public boolean checkExpiration(); //May not need to be boolean anymore
@@ -85,7 +87,7 @@ public abstract class MovingThing
   public float hitBox()
   {
     if( this instanceof Enemy )
-      return yPos+size/3;
+      return yPos+size/4;
     else
       return yPos;
   }
@@ -117,6 +119,11 @@ public abstract class MovingThing
     if( r.upgrades.get("Wide Laser 2") ) return data.enemyBaseSize*4;
     if( r.upgrades.get("Wide Laser 1") ) return data.enemyBaseSize*2;
     else return data.enemyBaseSize;
+  }
+  
+  public void destroy()
+  {
+    finished = true;
   }
   
 }

@@ -6,9 +6,10 @@ class Pickup extends MovingThing
   {
     xPos = e.xPos;
     yPos = e.yPos;
-    xSpd = e.xSpd+random(-2,2);
-    ySpd = e.ySpd+random(-2,2);
+    xSpd = e.xSpd+random(-4,4);
+    ySpd = e.ySpd+random(-4,4);
     angle = random(TWO_PI);
+    size = data.playerHitBox/2;
     
     movers.add(this);
   }
@@ -59,19 +60,19 @@ class Pickup extends MovingThing
     {
         inRange = true;
         //baseAccel = 0.004;
-        baseAccel = (800-distance)/50000;
+        baseAccel = (850-distance)/40000;
     }
     else if (robot.upgrades.get("Magnet 1") && distance < 400)
     {
         inRange = true;
         //baseAccel = 0.003;
-        baseAccel = (400-distance)/50000;
+        baseAccel = (550-distance)/40000;
     }
     else if (distance < 150)
     {
         inRange = true;
         //baseAccel = 0.002;
-        baseAccel = (200-distance)/50000;
+        baseAccel = (350-distance)/40000;
     }
 
     // Gradual buildup while in range
@@ -103,6 +104,11 @@ class Pickup extends MovingThing
     ySpd *= 0.85;
   }
 
+  @Override
+  public void bounce(Block b)
+  {
+    /*Ignore Walls*/
+  }
   
   public void show()
   {

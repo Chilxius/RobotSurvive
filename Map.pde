@@ -377,6 +377,18 @@ class Map
         chunkGrid[i][j].drawBlocks(m,wallColor,layer);
     //circle(exitX+data.xOffset,exitY+data.yOffset,data.blockSize);
     
+    //THIS IS A POORLY DONE BIT OF CODE, DONE BECAUSE OF TIME CONSTRAINTS - Sorry
+    if(exiting&&layer==0)
+    {
+      robot.cosmetics.display(robot.xPos+data.xOffset,robot.yPos+data.yOffset,false);
+      if( robot.shield > 0 )
+        robot.drawShield();
+      //image(tile,chunkGrid[mapSize-1][0].blockGrid[3][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[3][5].yPos+data.yOffset);
+      //image(tile,chunkGrid[mapSize-1][0].blockGrid[4][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[4][5].yPos+data.yOffset);
+      chunkGrid[mapSize-1][0].blockGrid[3][5].drawBlock(m,0,layer);
+      chunkGrid[mapSize-1][0].blockGrid[4][5].drawBlock(m,0,layer);
+    }
+    
     if(layer == 2)
       drawForegroundBlocks(m);
   }
@@ -394,12 +406,7 @@ class Map
   }
   
   private void drawForegroundBlocks(MovingThing m)
-  {    
-    if(exiting)
-    {
-      image(tile,chunkGrid[mapSize-1][0].blockGrid[3][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[3][5].yPos+data.yOffset);
-      image(tile,chunkGrid[mapSize-1][0].blockGrid[4][5].xPos+data.xOffset,chunkGrid[mapSize-1][0].blockGrid[4][5].yPos+data.yOffset);
-    }
+  { 
     
     for( BeamBlock b: frontBeams )
       if( dist( m.xPos+data.xOffset, m.yPos+data.yOffset, b.xPos+data.xOffset*2, b.yPos+data.yOffset*2 ) < width )

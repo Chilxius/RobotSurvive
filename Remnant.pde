@@ -35,6 +35,26 @@ class Remnant extends MovingThing
     movers.add(this);
   }
   
+  Remnant( Robot r )
+  {
+    xPos = r.xPos;
+    yPos = r.yPos;
+    size = r.size;
+    
+    angle = PI*int(random(2));
+    
+    image = shieldPic2;
+    
+    expiration = millis()+500;
+    opacity = 120;
+    fadeSpeed = 2;
+    grows = false;
+    
+    tint = 255;
+    
+    movers.add(this);
+  }
+  
   Remnant( Enemy e )
   {
     xPos = e.xPos;
@@ -49,6 +69,19 @@ class Remnant extends MovingThing
     opacity = 240;
     fadeSpeed = 2;
     grows = false;
+
+    tint = color(255);
+    
+    if( e.behavior instanceof VampireBehavior || e.behavior instanceof MageBehavior )
+    {
+      if( !e.dead )
+        tint = 0;
+      else
+      {
+        fadeSpeed = 1;
+        expiration = millis()+3000;
+      }
+    }
     
     trails.add(this);
   }
@@ -96,9 +129,9 @@ class Remnant extends MovingThing
     if( m instanceof Laser )
     {
       image = laserImage;
-      expiration = millis()+1000;
+      expiration = millis()+500;
       opacity = 240;
-      fadeSpeed = 2;
+      fadeSpeed = 4;
       grows = false;
       //xPos = (xPos + robot.xPos) / 2.0;
       //yPos = (yPos + robot.yPos) / 2.0;
@@ -125,7 +158,7 @@ class Remnant extends MovingThing
     tint(tint,opacity);
     if(laser)
     {
-      strokeWeight(laserWidth(robot)/7); //change with laser width
+      strokeWeight(laserWidth(robot)/9); //change with laser width
       if( robot.upgrades.get("Laser 4") )      stroke(200,25,25, opacity);
       else if( robot.upgrades.get("Laser 3") ) stroke(175,25,200,opacity);
       else if( robot.upgrades.get("Laser 2") ) stroke(25,100,200,opacity);

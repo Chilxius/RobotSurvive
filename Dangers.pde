@@ -14,7 +14,7 @@ interface Danger //(enemy projectiles)
 class Fireball extends MovingThing implements Danger
 {
   float angle;
-  int damage;
+  //int damage;
   
   Fireball( Enemy e, int d )
   {
@@ -76,7 +76,7 @@ class Fireball extends MovingThing implements Danger
 class Voice extends MovingThing implements Danger
 {
   float angle;
-  int damage;
+  //int damage;
   
   Voice( Enemy e, int d, int i )
   {
@@ -127,7 +127,7 @@ class BrainBlast extends MovingThing implements Danger
 {
   float angle;
   int duration;
-  int damage;
+  //int damage;
   
   BrainBlast( Enemy e, int d )
   {
@@ -184,7 +184,7 @@ class Skull extends MovingThing implements Danger
 {
   //float angle;
   int duration;
-  int damage;
+  //int damage;
   
   Skull( Enemy e, int d )
   {
@@ -240,7 +240,7 @@ class Skull extends MovingThing implements Danger
 class Bat extends MovingThing implements Danger
 { 
   int seekTimer;
-  int damage;
+  //int damage;
   
   Bat( Enemy e, int d )
   {

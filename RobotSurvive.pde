@@ -2,8 +2,9 @@
 //Robots vs Vampires
 
 //NEXT: 
-//      Get enemies to shove robot
-//      Have upgrades do their effect
+//      Main menu
+//      Scripting
+//      Help messages
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
@@ -19,10 +20,11 @@
 //Sound
 //Final cinematic
 //Opening cinematic
-//Keep discs from getting stuck in walls
 //Decorate upgrade wheel
 //Keep robot from getting stuck on walls when bumped
 //Little longer wait before banking discs
+//End-of-level stuff still so bad...
+//PANIC: release super-attack when at low health once per map/game
 
 import processing.sound.*;
 import java.util.Collections;
@@ -36,7 +38,9 @@ HUD hud;
 Map map;
 int mapLevel = 1;
 
-Enemy testEnemy, testEnemy2;
+Title title;
+
+//Enemy testEnemy, testEnemy2;
 
 StateManager manager = new StateManager();
 GameData data;// = new GameData();
@@ -68,27 +72,19 @@ void setup()
   data.loadImages();
   
   hud = new HUD();
+  title = new Title();
   
   upgradeTree = new RootNode<>( new Upgrade("Root") );
   buildTree();
   
-  manager.setState( new SurvivalState() );
+  manager.setState( new MenuState() );
 
   map = new Map(1);
   
-  //"test" and "ball"
   robot = new Robot("test", this);
-  robot.xPos = map.startingPoint('x');
-  robot.yPos = map.startingPoint('y');
-  robot.speed = 2;
-  robot.angle = QUARTER_PI;
-  robot.angleSpeed = 0.02;
-  robot.xSpd = 1;
-  robot.ySpd = 0;
   createUpgradeTree(robot);
   
   setupTestingStuff();
-
 }
 
 void draw()
@@ -96,30 +92,10 @@ void draw()
   background(0);
   manager.display();
   
-  ////TESTING TITLE SPLASH
-  //background(200);
-  
-  //fill(50,100,50);
-  //textFont( createFont("TechnoBoard-519Ej.ttf", 128) ); //Title - ROBOT
-  //textSize(180);
-  //text("ROBOTS",width/2,height/3+50);
-  
-  //fill(0);
-  //textFont( createFont("Javanese Text", 128) );
-  //textSize(75);
-  //text("vs",width/2,height/2-30);
-  
-  //fill(100,0,0);
-  //textFont( createFont("October Crow.ttf", 128) ); //Title - VAMPIRE
-  //textSize(175);
-  //translate(width/2+25,height*2.0/3-25);
-  //rotate(-0.2);
-  //text("VAMPIRES",0,0);
-  
-  //text(projectiles.size()+"",100,100);
-  //text(movers.size()+"",100,200);
-
-  text( testEnemy.health, 500, 500);
+  fill(255);
+  textSize(50);
+  text(movers.size(),100,100);
+  text(robot.discActive+"",100,200);
 }
 
 public void handleGhostWords()
@@ -212,6 +188,7 @@ public void checkAllShooters()
   }
 }
 
+//Interactions not handled elsewhere (REFACTOR: handle all interactions here or elsewhere, not both)
 public void checkAllMoversForHits()
 {
   //Robot, pickups, projectiles, enemies, dangers(bad projectiles)
@@ -225,7 +202,7 @@ public void checkAllMoversForHits()
       // Robot interactions
       if( movers.get(i) instanceof Robot )
       {
-        //Grab disc
+        //Grab diskette
         if( movers.get(j) instanceof Pickup && movers.get(i).intersects(movers.get(j)) )
         {
           robot.cash++;
@@ -239,6 +216,23 @@ public void checkAllMoversForHits()
             movers.get(j).takeDamage(int(robot.adjustedSpeed()*3));
           robot.getHitBy( (Enemy) movers.get(j) );
         }
+        //Hit by danger
+        else if( movers.get(j) instanceof Danger && movers.get(i).intersects(movers.get(j)) )
+        {
+          if( robot.getHitBy( movers.get(j) ) )
+            movers.remove(j);
+        }
+      }
+      
+      //*********************
+      // Enemy interactions
+      if( movers.get(i) instanceof Enemy && movers.get(j) instanceof Projectile && movers.get(i).intersects(movers.get(j)) )
+      {
+        if( !checkForBlast( (Projectile)movers.get(j) ) )
+        {
+          movers.get(i).takeDamage( movers.get(j).damage );
+        }
+        movers.get(j).destroy();
       }
     }
   }
@@ -254,11 +248,17 @@ public void checkMoversForRemoval()
     
   for( int i = 0; i < trails.size(); i++ )
     if( trails.get(i).finished )
+    {
       trails.remove(i);  
+      i--;
+    }
     
   for( int i = 0; i < movers.size(); i++ )
     if( movers.get(i).finished )
-      movers.remove(i);    
+    {
+      movers.remove(i);
+      i--;
+    }
 }
 
 public void createUpgradeTree( Robot r )
@@ -271,6 +271,34 @@ public void createUpgradeTree( Robot r )
   //println(r.upgrades);
 }
 
+public boolean checkForBlast( Projectile p )
+{
+  if( !(p instanceof Missile) || !( robot.upgrades.get("Blast Radius 1") || robot.upgrades.get("Blast Radius 2") ) ) return false;
+  
+  float range = robot.blastRange();
+  
+  for( MovingThing m: movers )
+  {
+    Missile x = (Missile) p;
+    if( m instanceof Enemy ) 
+    {
+      Enemy e = (Enemy) m;
+      if( dist(m.xPos, m.yPos, x.xPos, x.yPos) < range )
+        e.takeDamage(x.damage);
+    }
+  }
+  
+  ((Missile)p).expiration = 0;
+  
+  return true;
+}
+
+public void clearMovers()
+{
+  movers.clear();
+  movers.add(robot);
+}
+
 public void mousePressed(){keyPressed();}
 
 public void mouseReleased(){keyReleased();}
@@ -278,35 +306,39 @@ public void mouseReleased(){keyReleased();}
 public void keyPressed()
 {
   manager.reactToPress();
-  if( key == 'm' )
-    new Missile(robot,robot.missileDamage());
-  if( key == 'd' )
-    new Disc(robot,robot.discDamage());
-  if( key == 'k' )
-  {
-    testEnemy.dead = true;
-    new Pickup(testEnemy);
-  }
-  if( key == 'l' )
-    new Laser(robot,robot.laserDamage());
-  if( key == '1' )
-    robot.activateUpgrade("Armor Up 1");
-  if( key == '2' )
-    robot.activateUpgrade("Armor Up 2");
-  if( key == '3' )
-    robot.activateUpgrade("Armor Up 3");
-  if( key == ' ' )
-    robot.armor--;
-  if( key == 'q' )
-    new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
-  if( key == 'w' )
-    new GhostWords( "Press to Spin Upgrade Wheel", width*2/3, height-150 );
-  if( key == 'b' )
-    robot.activateUpgrade("Blast Radius 1");
-  if( key == 'x' )
-    robot.activateUpgrade("Blast Radius 2");
-  if( key == 'f' )
-    new Fireball(testEnemy, testEnemy.damage);
+  //if( key == 'm' )
+  //  new Missile(robot,robot.missileDamage());
+  //if( key == 'd' )
+  //  new Disc(robot,robot.discDamage());
+  //if( key == 'k' )
+  //{
+  //  testEnemy.dead = true;
+  //  new Pickup(testEnemy);
+  //}
+  //if( key == 'l' )
+  //  new Laser(robot,robot.laserDamage());
+  //if( key == '1' )
+  //  robot.activateUpgrade("Multi-Disc 1");
+  //if( key == '2' )
+  //  robot.activateUpgrade("Multi-Disc 2");
+  //if( key == '3' )
+  //  robot.activateUpgrade("Multi-Disc 3");
+  //if( key == ' ' )
+  //{
+  //  movers.add( new Enemy( new ZombieBehavior(), robot, 1 ) );
+  //  movers.get( movers.size()-1 ).xPos = 1200;
+  //  movers.get( movers.size()-1 ).yPos = 1050;
+  //}
+  //if( key == 'q' )
+  //  new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
+  //if( key == 'w' )
+  //  new GhostWords( "Press to Spin Upgrade Wheel", width*2/3, height-150 );
+  //if( key == 'b' )
+  //  robot.activateUpgrade("Blast Radius 1");
+  //if( key == 'x' )
+  //  robot.activateUpgrade("Blast Radius 2");
+  //if( key == 'f' )
+  //  new Fireball(testEnemy, testEnemy.damage);
 }
 
 public void keyReleased()
@@ -321,18 +353,26 @@ public void setupTestingStuff()
   //robot.activateUpgrade("Fast Disc");
   //robot.activateUpgrade("Disc Bounce 3");
   //robot.activateUpgrade("Extended Laser 1");
+  //robot.activateUpgrade("Wide Laser 2");
+  //robot.activateUpgrade("Bouncing Laser");
   //robot.activateUpgrade("Tunneling Laser");
   //robot.activateUpgrade("Magnet 2");
   //robot.activateUpgrade("Knockback Resist");
   //robot.activateUpgrade("Forceful Pushback");
+  //robot.activateUpgrade("Missile Reload 2");
+  //robot.activateUpgrade("Multi-Launch 2");
+  //robot.activateUpgrade("Laser 1");
+  //robot.activateUpgrade("Razor Disc 1");
+  //robot.activateUpgrade("Missile 1");
   
-  movers.add(robot);
   
-  testEnemy = new Enemy( new ZombieBehavior(), robot, 1 );
-  testEnemy.xPos = 500;
-  testEnemy.yPos = 1300;
+  //movers.add(robot);
   
-  movers.add(testEnemy);
+  //testEnemy = new Enemy( new ZombieBehavior(), robot, 1 );
+  //testEnemy.xPos = 500;
+  //testEnemy.yPos = 1300;
+  
+  //movers.add(testEnemy);
   
   //movers.add( new Enemy( new GhostBehavior(), robot, 1 ) );
   //movers.get( movers.size()-1 ).xPos = 400;
@@ -389,3 +429,31 @@ public void setupTestingStuff()
   //testWheel.addUpgrade( new Upgrade("Bouncing Missile") );
   //testWheel.buildWheel(4);
 }
+
+
+//public void showTitle( int opacity )
+//{
+//  push();
+//  noStroke();
+//  fill(200);
+//  rectMode(CENTER);
+//  rect(width/2,height/2,width,height);
+  
+//  fill(50,100,50);
+//  textFont( createFont("TechnoBoard-519Ej.ttf", 128) ); //Title - ROBOT
+//  textSize(180);
+//  text("ROBOTS",width/2,height/3+50);
+  
+//  fill(0);
+//  textFont( createFont("Javanese Text", 128) );
+//  textSize(75);
+//  text("vs",width/2,height/2-30);
+  
+//  fill(100,0,0);
+//  textFont( createFont("October Crow.ttf", 128) ); //Title - VAMPIRE
+//  textSize(175);
+//  translate(width/2+25,height*2.0/3-25);
+//  rotate(-0.2);
+//  text("VAMPIRES",0,0);
+//  pop();
+//}

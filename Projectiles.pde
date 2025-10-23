@@ -7,7 +7,7 @@ class Missile extends MovingThing implements Projectile
   Enemy target;
   
   int expiration;
-  int damage;
+  //int damage;
   
   Missile( Robot r, int damage )
   {
@@ -16,10 +16,11 @@ class Missile extends MovingThing implements Projectile
     xPos = r.xPos-data.playerHitBox; //offset to left hand (where launcher is)
     yPos = r.yPos;
     
-    xSpd = -3;
+    xSpd = random(-3,3);
+    ySpd = random(-3,3);
     
-    xAcc = 0.08;
-    yAcc = 0.08;
+    xAcc = 0.1;
+    yAcc = 0.1;
     
     size = data.missileSize;
     
@@ -29,7 +30,8 @@ class Missile extends MovingThing implements Projectile
     movers.add(this);
     
     //TESTING
-    target = testEnemy;
+    //target = testEnemy;
+    target = closeTarget();
   }
   
   public void show()
@@ -65,8 +67,8 @@ class Missile extends MovingThing implements Projectile
     xPos += xSpd;
     yPos += ySpd;
     
-    xSpd *= 0.999;
-    ySpd *= 0.999;
+    xSpd *= 0.99;
+    ySpd *= 0.99;
   }
   
   @Override
@@ -78,24 +80,69 @@ class Missile extends MovingThing implements Projectile
       expiration = 0;
   }
   
+  @Override
+  public void destroy()
+  {
+    expiration = 0;
+  }
+  
   public boolean checkExpiration()
   {
     if(!finished && millis() > expiration)
     {
       finished = true;
+      if( robot.upgrades.get("Blast Radius 1") ) size*=2;
+      if( robot.upgrades.get("Blast Radius 2") ) size*=4;
       new Remnant(this);
       return true;
     }
     
     return false;
   }
+  
+  private Enemy closeTarget()
+  {
+    ArrayList<Enemy> sorted = new ArrayList<Enemy>();
+    for( MovingThing m: movers )
+      if( m instanceof Enemy )
+      {
+        Enemy e = (Enemy) m;
+        
+        //Only include targets close to target
+        float dx = e.xPos - xPos;
+        float dy = e.yPos - yPos;
+        float distSq = dx*dx + dy*dy;
+
+        if (distSq > (data.blockSize*12)*(data.blockSize*12)) continue;
+        
+        sorted.add((Enemy)m);
+      }
+      
+    if (sorted.size() <= 1) return sorted.isEmpty() ? null : sorted.get(0);
+  
+    Collections.sort(sorted, new Comparator<Enemy>() {
+      public int compare(Enemy a, Enemy b) {
+        return Float.compare(
+          sq(a.xPos - xPos) + sq(a.yPos - yPos),
+          sq(b.xPos - xPos) + sq(b.yPos - yPos)
+        );
+      }
+    });
+    
+    int roll1 = int(random(sorted.size()));
+    int roll2 = int(random(sorted.size()));
+    int roll3 = int(random(sorted.size()));
+    int roll4 = int(random(sorted.size()));
+    int chosenIndex = min(min(roll1, roll2), min(roll3, roll4));
+    return sorted.get( chosenIndex );
+  }
 }
 
-class Disc extends MovingThing
+class Disc extends MovingThing implements Projectile
 {
   //int expiration;
   boolean step;
-  int damage;
+  //int damage;
   
   Disc( Robot r, int damage )
   {
@@ -104,7 +151,8 @@ class Disc extends MovingThing
     xPos = r.xPos;
     yPos = r.yPos;
     
-    r.discAngle+=HALF_PI;
+    r.discAngle+=robot.discAngleShift();
+    
     int speed;
     if( r.upgrades.get("Fast Disc") )
       speed = 10;
@@ -114,7 +162,7 @@ class Disc extends MovingThing
     xSpd = cos(r.discAngle) * speed;
     ySpd = sin(r.discAngle) * speed;
     
-    size = data.missileSize;
+    size = data.missileSize*1.2;
     
     //expiration = 2; //walls it can bounce off
     

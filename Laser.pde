@@ -1,18 +1,9 @@
-//class Laser
-//{
-//  Leader lead;
-  
-//  Laser(Robot r)
-//  {
-//    lead = new Leader(r);
-
-//  }
-//}
-
 class Laser extends MovingThing
 {
   int steps;
   color lazColor;
+  
+  ArrayList<Enemy> targets;
   
   Laser( Robot r, int damage )
   {
@@ -29,6 +20,8 @@ class Laser extends MovingThing
     
     size = laserWidth(r);
     
+    targets = new ArrayList<Enemy>();
+    
     measure();
     
     movers.add(this);
@@ -44,8 +37,8 @@ class Laser extends MovingThing
   public void measure()
   {
     int i = 0;
-    float oX = robot.xPos + robot.xSpd*50;
-    float oY = robot.yPos + robot.ySpd*50;;
+    float oX = robot.xPos + robot.xSpd*25;
+    float oY = robot.yPos + robot.ySpd*25;
     
     for(; i < steps; i++)
     {
@@ -53,10 +46,26 @@ class Laser extends MovingThing
       yPos += ySpd;
       
       //TODO: check for hit
-      if( intersects(testEnemy) )
+      //if( intersects(testEnemy) )
+      //{
+      //  new Remnant(xPos,yPos); //Creates impact explosion
+      //  break;
+      //}
+      
+      Enemy target = enemyHit();
+      if( target != null )
       {
-        new Remnant(xPos,yPos); //Creates impact explosion
-        break;
+        if( robot.upgrades.get("Piercing Laser") )
+        {
+          if( !targets.contains(target) )
+            targets.add(target);
+        }
+        else
+        {
+          target.takeDamage(robot.laserDamage());
+          new Remnant(xPos,yPos);
+          break;
+        }
       }
       if( map.intersectingBlock(this)!= null )
       {
@@ -91,7 +100,23 @@ class Laser extends MovingThing
     
     //create remnant
     finished = true;
+    if( robot.upgrades.get("Piercing Laser") )
+      for( Enemy e: targets )
+      {
+        e.takeDamage(robot.laserDamage());
+        new Remnant(e.xPos+data.xOffset,e.yPos+data.yOffset);
+      }
     new Remnant(this,oX,oY);//,lazColor); //creates beam
+  }
+  
+  private Enemy enemyHit()
+  {
+    for( MovingThing m: movers )
+      if( m instanceof Enemy && m.intersects(this) )
+        return (Enemy) m;
+
+    
+    return null;
   }
   
   public void move(){/*Does not move*/}

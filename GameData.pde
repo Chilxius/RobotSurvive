@@ -1,4 +1,4 @@
-PImage tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,bigFacePic;
+PImage titlePic,tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,shieldPic2,bigFacePic;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
@@ -27,6 +27,10 @@ class GameData
 
   public void loadImages()
   {
+    //Title Page
+    titlePic = loadImage("title.png");
+    titlePic.resize(width,0);
+    
     //Floppy Disc
     floppy = loadImage("floppy.png");
     floppy.resize(30,0);
@@ -40,6 +44,8 @@ class GameData
     //Shield
     shieldPic = loadImage("shield.png");
     shieldPic.resize(int(data.playerSize),0);
+    shieldPic2 = loadImage("shieldRemnant.png");
+    shieldPic2.resize(int(data.playerSize),0);
     
     //Map
     tile = loadImage("tile3.png");

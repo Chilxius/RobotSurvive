@@ -19,6 +19,7 @@ class MenuState implements GameState
   }
   void goToSurvival(StateManager manager)
   {
+    clearMovers();
     manager.setState( new SurvivalState() );
   }
   void goToUpgrade(StateManager manager)
@@ -32,18 +33,17 @@ class MenuState implements GameState
   
   void display()
   {
-    testWheel.show();
-    testWheel.spin();
+    title.display();
   }
   
   void reactToPress()
   {
-    testWheel.pressReact(true);
+    title.pressReact();
   }
   
   void reactToRelease()
   {
-    testWheel.pressReact(false);
+    
   }
 }
 
@@ -59,7 +59,7 @@ class SurvivalState implements GameState
   }
   void goToUpgrade(StateManager manager)
   {
-    //TEST
+    ghostWords.clear();
     hud.commsBoxOffset = -height;
     hud.commsBoxOpening = true;
     manager.setState( new UpgradeState() );
@@ -127,6 +127,7 @@ class UpgradeState implements GameState
   }
   void goToSurvival(StateManager manager)
   {
+    clearMovers();
     manager.setState( new SurvivalState() );
   }
   void goToUpgrade(StateManager manager)

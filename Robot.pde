@@ -11,7 +11,7 @@ class Robot extends MovingThing
   String shortName;
   
   float angle;
-  float angleSpeed;
+  //float angleSpeed;
   float discAngle = QUARTER_PI; //for alternating disc directions
   
   float speed;
@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash = 9999;
+  int cash = 1500;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -31,31 +31,42 @@ class Robot extends MovingThing
   
   int iFrames;
   
+  boolean discActive;
+  int nextDisc;
+  boolean laserActive;
+  int nextLaser;
+  boolean missileActive;
+  int nextMissile;
+  
   public Robot( String name, PApplet parent )
   {
     cosmetics = new CosmeticKit( name, parent );
     size = data.playerSize;
     
-    //guide = new TurnGuide(100,height-100,this);
+    speed = 2;
+    xSpd = 1;
+    ySpd = 0;
+    angle = QUARTER_PI;
+    
+    xPos = map.startingPoint('x');
+    yPos = map.startingPoint('y');
     
     shortName = generateName(1);
     fullName = shortName + generateName(2);
     
     armor = 20;
     
-    ////TESTING
-    //println( shortName + " " + fullName );
-    
-    ////TESTING
-    //for(int i = 0; i < 200; i++)
-    //  println(generateName(1) + generateName(2));
+    movers.add(this);
   }
   
   public void show()
   {
+    if(map.exiting) return;
+    
     //showDirectionDisplay();
-    if(!map.exiting)
-      recordAndDrawPointers();
+    //if(!map.exiting)
+    recordAndDrawPointers();
+    
     cosmetics.display(xPos+data.xOffset,yPos+data.yOffset,iFrames>millis());
     //circle(xPos+data.xOffset,yPos+data.yOffset,data.playerHitBox);
     if( shield > 0 )
@@ -119,6 +130,67 @@ class Robot extends MovingThing
         nextShieldRegen = millis() + 10000;
       } 
     }
+    
+    if( discActive && millis() > nextDisc )
+    {
+      nextDisc = millis()+800;
+      
+      new Disc(this,discDamage());
+      
+      if( upgrades.get("Multi-Disc 1") )
+        new Disc(this,discDamage());
+        
+      if( upgrades.get("Multi-Disc 2") )
+      {
+        new Disc(this,discDamage());
+        new Disc(this,discDamage());
+      }
+      
+      if( upgrades.get("Multi-Disc 3") )
+      {
+        new Disc(this,discDamage());
+        new Disc(this,discDamage());
+        new Disc(this,discDamage());
+      }
+    }
+    
+    if( laserActive && millis() > nextLaser )
+    {
+      nextLaser = millis()+1000;
+      new Laser(this,laserDamage());
+    }
+    
+    if( missileActive && millis() > nextMissile )
+    {
+      nextMissile = millis() + missileDelay();
+      
+      new Missile(this,missileDamage());
+      
+      if( upgrades.get("Multi-Launch 1") )
+        new Missile(this,missileDamage());
+      
+      if( upgrades.get("Multi-Launch 2") )
+      {
+        new Missile(this,missileDamage());
+        new Missile(this,missileDamage());
+        new Missile(this,missileDamage());
+      }
+    }
+  }
+  
+  private int missileDelay()
+  {
+    if( upgrades.get("Missile Reload 2") ) return 900;
+    if( upgrades.get("Missile Reload 1") ) return 1200;
+    return 1500;
+  }
+  
+  public float discAngleShift()
+  {
+    if( upgrades.get("Multi-Disc 3") ) return TWO_PI/5;
+    if( upgrades.get("Multi-Disc 2") ) return TWO_PI/4;
+    if( upgrades.get("Multi-Disc 1") ) return PI*.75;
+    return HALF_PI;
   }
   
   private void drawShield()
@@ -127,6 +199,13 @@ class Robot extends MovingThing
     tint(255,50);
     image( shieldPic, xPos+data.xOffset, yPos+data.yOffset );
     pop();
+  }
+  
+  public float blastRange()
+  {
+    if( upgrades.get("Blast Radius 2") ) return data.blockSize*2;
+    if( upgrades.get("Blast Radius 1") ) return data.blockSize;
+    return 0;
   }
   
   public boolean checkExpiration()
@@ -139,8 +218,8 @@ class Robot extends MovingThing
   {
     //Go back a step to avoid phasing through the block partially before
     //  determining direction of bounce
-    xPos -= xSpd+bumpX*2;
-    yPos -= ySpd+bumpY*2;
+    xPos -= (xSpd+bumpX)*2;
+    yPos -= (ySpd+bumpY)*2;
     
     if(abs(xPos - b.xPos) > abs(yPos - b.yPos)) //horizontal
     {
@@ -172,16 +251,31 @@ class Robot extends MovingThing
     //Take damage
     takeDamage( e.damage );
     
-    iFrames = millis() + 1000;
+    iFrames = millis() + 500;
+  }
+  
+  public boolean getHitBy( MovingThing m )
+  {
+    if( iFrames > millis() ) return false;
+    
+    takeDamage( m.damage );
+    
+    iFrames = millis() + 500;
+    
+    return true;
   }
   
   public void takeDamage( int d )
   {
     if( shield > 0 )
+    {
       shield--;
+      new Remnant(this);
+    }
     else
     {
       armor -= d;
+      new GhostWords(d,xPos,yPos);
       if( armor <= 0 )
       {
         //DEAD - go to BREAKDOWN
@@ -201,17 +295,29 @@ class Robot extends MovingThing
   
   public int missileDamage()
   {
-    return 1;
+    if( upgrades.get("Missile 4") ) return 6;
+    if( upgrades.get("Missile 3") ) return 4;
+    if( upgrades.get("Missile 2") ) return 2;
+    if( upgrades.get("Missile 1") ) return 1;
+    return 0;
   }
   
   public int discDamage()
   {
-    return 1;
+    if( upgrades.get("Razor Disc 4") ) return 8;
+    if( upgrades.get("Razor Disc 3") ) return 6;
+    if( upgrades.get("Razor Disc 2") ) return 4;
+    if( upgrades.get("Razor Disc 1") ) return 2;
+    return 0;
   }
   
   public int laserDamage()
   {
-    return 1;
+    if( upgrades.get("Laser 4") ) return 12;
+    if( upgrades.get("Laser 3") ) return 9;
+    if( upgrades.get("Laser 2") ) return 6;
+    if( upgrades.get("Laser 1") ) return 3;
+    return 0;
   }
   
   public void checkForScroll()
@@ -275,9 +381,9 @@ class Robot extends MovingThing
   {
     if(upgrades.get("Movement Speed 4")) return 3.75;
     if(upgrades.get("Movement Speed 3")) return 3;
-    if(upgrades.get("Movement Speed 2")) return 2.25;
-    if(upgrades.get("Movement Speed 1")) return 1.5;
-    return 1;
+    if(upgrades.get("Movement Speed 2")) return 2.5;
+    if(upgrades.get("Movement Speed 1")) return 2;
+    return 1.5;
   }
   
   private float adjustedAngleSpeed()
@@ -329,7 +435,22 @@ class Robot extends MovingThing
         i--;
       }
     }
+    
+    //robot.drawLaserCrosshair();
   }
+  
+  //private void drawLaserCrosshair()
+  //{
+  //  if( !(upgrades.get("Laser 1") || upgrades.get("Laser 2") || upgrades.get("Laser 3") || upgrades.get("Laser 4") ) ) return;
+    
+  //  push();
+  //  translate(xPos+data.xOffset,yPos+data.yOffset);
+  //  rotate(angle);
+  //  noStroke();
+  //  fill(25,200,200);
+  //  circle(300,0,10);
+  //  pop();
+  //}
   
   private String generateName( int part )
   {
@@ -414,6 +535,7 @@ class Robot extends MovingThing
       case "Laser 4": upgrades.put("Laser 3",false);
       case "Laser 3": upgrades.put("Laser 2",false);
       case "Laser 2": upgrades.put("Laser 1",false);
+      case "Laser 1": laserActive = true;
       break;
       case "Extended Laser 2": upgrades.put("Extended Laser 1",false);
       break;
@@ -422,6 +544,7 @@ class Robot extends MovingThing
       case "Missile 4": upgrades.put("Missile 3",false);
       case "Missile 3": upgrades.put("Missile 2",false);
       case "Missile 2": upgrades.put("Missile 1",false);
+      case "Missile 1": missileActive = true;
       break;
       case "Missile Reload 2": upgrades.put("Missile Reload 1",false);
       break;
@@ -432,6 +555,7 @@ class Robot extends MovingThing
       case "Razor Disc 4": upgrades.put("Razor Disc 3",false);
       case "Razor Disc 3": upgrades.put("Razor Disc 2",false);
       case "Razor Disc 2": upgrades.put("Razor Disc 1",false);
+      case "Razor Disc 1": discActive = true;
       break;
       case "Multi-Disc 3": upgrades.put("Multi-Disc 2",false);
       case "Multi-Disc 2": upgrades.put("Multi-Disc 1",false);

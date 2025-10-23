@@ -5,7 +5,7 @@ class Enemy extends MovingThing
 {
   int level;
   
-  int damage;
+  //int damage;
   int projectileDamage;
   float health;
   boolean dead;
@@ -128,6 +128,8 @@ class Enemy extends MovingThing
     pop();
     
     drawEffect();
+    
+    //circle(xPos+data.xOffset,hitBox()+data.yOffset,size);
   }
   
   private void drawEffect()
@@ -171,6 +173,11 @@ class Enemy extends MovingThing
     new GhostWords( amount, xPos, yPos );
     if( health < 0 )
       dead = true;
+    else //minor slow
+    {
+      xSpd *= 0.5;
+      ySpd *= 0.5;
+    }
   }
   
   public boolean checkExpiration()
