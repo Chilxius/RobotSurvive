@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash = 1500;
+  int cash = 0;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -53,6 +53,8 @@ class Robot extends MovingThing
     
     shortName = generateName(1);
     fullName = shortName + generateName(2);
+    
+    turningClockwise = true;
     
     armor = 20;
     
@@ -251,7 +253,7 @@ class Robot extends MovingThing
     //Take damage
     takeDamage( e.damage );
     
-    iFrames = millis() + 500;
+    iFrames = millis() + 1000;
   }
   
   public boolean getHitBy( MovingThing m )
@@ -260,7 +262,7 @@ class Robot extends MovingThing
     
     takeDamage( m.damage );
     
-    iFrames = millis() + 500;
+    iFrames = millis() + 1000;
     
     return true;
   }
@@ -337,14 +339,10 @@ class Robot extends MovingThing
   
   private void checkForExit()
   {
+    if( !map.canLeave ) return;
+    
     if( dist( xPos, yPos, map.exitX, map.exitY-data.blockSize/3 ) < data.blockSize/2+data.playerHitBox/2 )
       map.exiting = true;
-  }
-  
-  public void setPosition( float x, float y )
-  {
-    xPos = x;
-    yPos = y;
   }
   
   public void restoreArmor( int amount )
@@ -451,6 +449,16 @@ class Robot extends MovingThing
   //  circle(300,0,10);
   //  pop();
   //}
+  
+  public String getLongName()
+  {
+    return fullName;
+  }
+  
+  public String getShortName()
+  {
+    return shortName;
+  }
   
   private String generateName( int part )
   {

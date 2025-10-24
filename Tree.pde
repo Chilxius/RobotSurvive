@@ -79,7 +79,8 @@ public void buildTree()
         upgradeTree.children.get(3).left.right.left = new Node( new Upgrade("Multi-Launch 2") );
     upgradeTree.children.get(3).right = new Node( new Upgrade("Missile Reload 1") );
       upgradeTree.children.get(3).right.right = new Node( new Upgrade("Missile Reload 2") );
-        upgradeTree.children.get(3).right.right.right = new Node( new Upgrade("Bouncing Missile") );
+        upgradeTree.children.get(3).right.right.left = new Node( new Upgrade("Bouncing Missile") );
+        upgradeTree.children.get(3).right.right.right = new Node( new Upgrade("Demolition Missile") );
       upgradeTree.children.get(3).right.left = new Node( new Upgrade("Blast Radius 1") );
         upgradeTree.children.get(3).right.left.left = new Node( new Upgrade("Blast Radius 2") );
   //Razor Discs

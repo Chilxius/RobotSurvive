@@ -20,6 +20,11 @@ class Map
   boolean exiting;
   float fade;
   
+  //Getting infinite loop without doing this
+  boolean firstSpawn;
+  
+  boolean canLeave;
+  
   Map( int l )
   {
     level = l;
@@ -33,9 +38,20 @@ class Map
     createBeams();
     createRooms();
     createLegalPath();
+    createBarriers();
     fillClosedRooms();
-    addCaps();
+    //addCaps();
     createExit();
+    
+    //initialSpawn();
+    firstSpawn = true;
+  }
+  
+  private void createBarriers()
+  {
+    for( int i = 0; i < mapSize; i++ )
+      for( int j = 0; j < mapSize; j++ )
+        chunkGrid[i][j].convertToBarriers(i,j,mapSize-1);
   }
   
   private void createBeams()
@@ -70,13 +86,6 @@ class Map
           }
         }
       }
-  }
-  
-  public void addCaps()
-  {
-    for( int i = 0; i < mapSize; i++ )
-      for( int j = 0; j < mapSize; j++ )
-        chunkGrid[i][j].addCaps();
   }
   
   private void createExit()
@@ -419,7 +428,7 @@ class Map
       for( int j = 0; j < chunkGrid[0].length; j++ )
         for( int k = 0; k < 8; k++ )
           for( int l = 0; l < 8; l++ )
-            if( chunkGrid[i][j].blockGrid[k][l].state == BlockState.SOLID && chunkGrid[i][j].blockGrid[k][l].intersects(m) )
+            if( ( chunkGrid[i][j].blockGrid[k][l].state == BlockState.SOLID || chunkGrid[i][j].blockGrid[k][l].state == BlockState.BORDER ) && chunkGrid[i][j].blockGrid[k][l].intersects(m) )
               return chunkGrid[i][j].blockGrid[k][l];
     
     return null;
@@ -450,6 +459,73 @@ class Map
     rect(width/2,height/2,width,height);
     pop();
   }
+  
+  //Spawn, moving from exit
+  public void spawnEnemies( EnemyBehavior b, int amount )
+  {
+    
+  }
+  
+  //Specific enemy at specific chunk
+  public void spawnEnemy( EnemyBehavior b, int x, int y )
+  {
+    new Enemy( b, robot );
+    movers.get( movers.size()-1 ).setPosition( chunkGrid[x][y].blockGrid[int(random(6))+1][int(random(6))+1].xPos,chunkGrid[x][y].blockGrid[int(random(6))+1][int(random(6))+1].yPos);
+  }
+  
+  //Seems safe on all levels except first
+  public void randomSpawn( EnemyBehavior b, int amount )
+  {
+    for( int i = 0; i < amount; i++ )
+    {
+      int x,y;
+      do{ x = int(random(mapSize)); y = int(random(mapSize)); println("top"); }
+      while( chunkGrid[x][y].blockGrid[3][3].state != BlockState.OPEN ); 
+      
+      spawnEnemy( b, x, y );
+      while( movers.get(movers.size()-1).onScreen() || movers.get(movers.size()-1).currentBlockState()==BlockState.SOLID || movers.get(movers.size()-1).currentBlockState()==BlockState.BORDER )
+      { movers.get(movers.size()-1).setPosition(random(mapSize*data.blockSize),random(mapSize*data.blockSize) ); println("bottom"); }
+    }
+  }
+  
+  public void initialSpawn()
+  {
+    firstSpawn = false;
+    switch(level)
+    {
+      case 1:
+        break;
+        
+      case 2:
+        randomSpawn( new RatBehavior(), 5 );
+        break;
+        
+      case 3:
+        randomSpawn( new RatBehavior(), 5 );
+        break;
+    }
+  }
+  
+  //Based on map level - spawned halfway through
+  public void levelSpawn()
+  {
+    switch(level)
+    {
+      case 1:
+        break;
+        
+      case 2:
+        
+        break;
+        
+    }
+  }
+  
+  //Level type
+  public void initialSetup()
+  {
+    
+  }
 }
 
 //**********************
@@ -458,12 +534,14 @@ class Chunk
 {
   Block [][] blockGrid = new Block[8][8];
   boolean visited; //for creating rooms
+  boolean occupied; //for spawning enemies
   
   Chunk( int x, int y )
   {
     for( int i = 0; i < 8; i++ )
       for( int j = 0; j < 8; j++ )
         blockGrid[i][j] = new Block( i==0 || j==0 || i == 7 || j == 7, i==1 || j==1, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
+    //convertToBarriers(x,y);
   }
   
   public void drawBlocks(MovingThing m, color c, int layer)// int x, int y )
@@ -473,20 +551,37 @@ class Chunk
         blockGrid[i][j].drawBlock(m,c,layer);//x,y,i,j);
   }
   
-  private void addCaps()
+  //Make map's outer walls unbreakable
+  private void convertToBarriers( int x, int y, int max )
   {
-    for( int i = 0; i < 8; i++ )
-      for( int j = 1; j < 8; j++ )
-        if( hasCap(i,j) )
-          blockGrid[i][j].addCap();// = new Block( i==0 || j==0 || i == 7 || j == 7, i==1 || j==1, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
+    if( x == 0 ) //Left walls
+      for( int j = 0; j < 8; j++ )
+        blockGrid[0][j].state = BlockState.BORDER;
+    if( x == max ) //Right walls
+      for( int j = 0; j < 8; j++ )
+        blockGrid[7][j].state = BlockState.BORDER;
+    if( y == 0 ) //Top walls
+      for( int i = 0; i < 8; i++ )
+        blockGrid[i][0].state = BlockState.BORDER;
+    if( y == max ) //Bottom walls
+      for( int i = 0; i < 8; i++ )
+        blockGrid[i][7].state = BlockState.BORDER;
   }
   
-  private boolean hasCap(int i, int j)
-  {
-    if( blockGrid[i][j].state == BlockState.SOLID && blockGrid[i][j-1].state != BlockState.SOLID )
-      return true;
-    return false; 
-  }
+  //private void addCaps()
+  //{
+  //  for( int i = 0; i < 8; i++ )
+  //    for( int j = 1; j < 8; j++ )
+  //      if( hasCap(i,j) )
+  //        blockGrid[i][j].addCap();// = new Block( i==0 || j==0 || i == 7 || j == 7, i==1 || j==1, x*data.blockSize*8+i*data.blockSize, y*data.blockSize*8+j*data.blockSize );
+  //}
+  
+  //private boolean hasCap(int i, int j)
+  //{
+  //  if( blockGrid[i][j].state == BlockState.SOLID && blockGrid[i][j-1].state != BlockState.SOLID )
+  //    return true;
+  //  return false; 
+  //}
 }
 
 //**********************
@@ -498,24 +593,27 @@ class Block
   float xPos, yPos;
   
   int decoration = -1;
-  boolean hasCap;
+  //boolean hasCap;
+  
   
   public Block( boolean wall, boolean covered, float x, float y )
   {
-    if( wall ) state = BlockState.SOLID;
-    else state = BlockState.OPEN;
+    if( wall )
+      state = BlockState.SOLID;
+    else
+      state = BlockState.OPEN;
     
     xPos = x;
     yPos = y;
-    hasCap = false;
+    //hasCap = false;
     
     setDecoration(covered);
   }
   
-  private void addCap()
-  {
-    hasCap = true;
-  }
+  //private void addCap()
+  //{
+  //  hasCap = true;
+  //}
   
   private void setDecoration(boolean covered)
   {
@@ -525,6 +623,11 @@ class Block
       if( covered )
         decoration = 0;
     }
+  }
+  
+  public boolean onScreen()
+  {
+    return xPos+data.xOffset+data.blockSize/2 > 0 && xPos+data.xOffset-data.blockSize/2 < width && yPos+data.yOffset+data.blockSize/2 > 0 && yPos+data.yOffset-data.blockSize/2 < height;
   }
   
   void drawBlock(MovingThing m, color c, int layer)// float cX, float cY, float bX, float bY )
@@ -543,6 +646,14 @@ class Block
       //  image(grid,xPos+data.xOffset,yPos+data.yOffset);
       //  pop();
       //}
+      if( state == BlockState.BROKEN )
+      {
+        push();
+        image(tile,xPos+data.xOffset,yPos+data.yOffset);
+        tint(c);
+        image(ruin,xPos+data.xOffset,yPos+data.yOffset);
+        pop();
+      }
       if( state == BlockState.EXIT )
       {
         image(exit,xPos+data.xOffset,yPos+data.yOffset);
@@ -553,7 +664,7 @@ class Block
     //Middle Layer
     else if(layer == 1)
     {
-      if( state == BlockState.SOLID )
+      if( state == BlockState.SOLID || state == BlockState.BORDER )
       {
         push();
         tint(c);
@@ -570,6 +681,12 @@ class Block
     //    image(cap,xPos+data.xOffset,yPos+data.yOffset);
     //  pop();
     //}
+  }
+  
+  public void demolish()
+  {
+    if( state == BlockState.SOLID )
+      state = BlockState.BROKEN;
   }
   
   public boolean intersects( MovingThing m )
@@ -609,5 +726,5 @@ class BeamBlock
 
 public enum BlockState
 {
-  SOLID, OPEN, DOOR, EXIT, NONE
+  BORDER, SOLID, OPEN, DOOR, EXIT, BROKEN, NONE
 }

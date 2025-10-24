@@ -1,4 +1,4 @@
-PImage titlePic,tile,wall,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,shieldPic2,bigFacePic;
+PImage titlePic,tile,wall,ruin,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,shieldPic2,bigFacePic,token;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
@@ -47,11 +47,17 @@ class GameData
     shieldPic2 = loadImage("shieldRemnant.png");
     shieldPic2.resize(int(data.playerSize),0);
     
+    //Continue Token
+    token = loadImage("token.png");
+    token.resize(150,0);
+    
     //Map
     tile = loadImage("tile3.png");
     tile.resize(0,int(data.blockSize));
     wall = loadImage("wallLong9.png");
     wall.resize(0,int(data.blockSize*1.25));
+    ruin = loadImage("ruin.png");
+    ruin.resize(0,int(data.blockSize));
     cap = loadImage("wallCap4.png");
     cap.resize(int(data.blockSize),0);
     grid = loadImage("doorGrid3.png");
@@ -125,6 +131,7 @@ class GameData
     upgradeImages.put("Blast Radius 1",loadImage("boom.png") );
     upgradeImages.put("Blast Radius 2",loadImage("bigBoom.png") );
     upgradeImages.put("Bouncing Missile",loadImage("missileBounce.png") );
+    upgradeImages.put("Demolition Missile",loadImage("demo.png") );
     //Discs
     upgradeImages.put("Razor Disc 1",loadImage("disc 1.png") );
     upgradeImages.put("Razor Disc 2",loadImage("disc 2.png") );

@@ -3,7 +3,7 @@ HashMap<String, PImage> enemyImages = new HashMap<String, PImage>();
 
 class Enemy extends MovingThing
 {
-  int level;
+  //int level;
   
   //int damage;
   int projectileDamage;
@@ -18,11 +18,11 @@ class Enemy extends MovingThing
   
   Robot target;
   
-  Enemy( EnemyBehavior b, Robot r, int l )
+  Enemy( EnemyBehavior b, Robot r )
   {
     behavior = b;
     target = r;
-    level = l;
+    //level = l;
     
     health = behavior.maxHealth;
     dead = false;
@@ -53,6 +53,9 @@ class Enemy extends MovingThing
     loadEnemyImage(b, "1", size);
     loadEnemyImage(b, "2", size);
     loadEnemyImage(b, "x", size);
+    
+    movers.add(this);
+    move();
   }
   
   //Load by name, only the first time it's needed
@@ -79,10 +82,10 @@ class Enemy extends MovingThing
       //Shooters stop when they get close, all enemies stop accelerating when dead
       if( !(behavior.ranged && dist( target.xPos, target.yPos, xPos, yPos ) < data.blockSize * behavior.minRange ) && !dead )
       {
-        if( target.xPos < xPos ) xSpd -= behavior.speedMultiplier*level;
-        else                     xSpd += behavior.speedMultiplier*level;
-        if( target.yPos < yPos ) ySpd -= behavior.speedMultiplier*level;
-        else                     ySpd += behavior.speedMultiplier*level;
+        if( target.xPos < xPos ) xSpd -= behavior.speedMultiplier;
+        else                     xSpd += behavior.speedMultiplier;
+        if( target.yPos < yPos ) ySpd -= behavior.speedMultiplier;
+        else                     ySpd += behavior.speedMultiplier;
       }
     }
     

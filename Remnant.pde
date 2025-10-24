@@ -118,8 +118,6 @@ class Remnant extends MovingThing
   //For lasers
   Remnant( MovingThing m, float oX, float oY)//, color c )
   {
-    //lazColor = c;
-    
     xPos = m.xPos;
     yPos = m.yPos;
     
@@ -128,18 +126,11 @@ class Remnant extends MovingThing
     
     if( m instanceof Laser )
     {
-      image = laserImage;
       expiration = millis()+500;
       opacity = 240;
       fadeSpeed = 4;
       grows = false;
-      //xPos = (xPos + robot.xPos) / 2.0;
-      //yPos = (yPos + robot.yPos) / 2.0;
-      //tint = color( random(255), random(255), random(255) );
-      //angle = robot.angle-HALF_PI;
       laser = true;
-      //originX = robot.xPos + robot.xSpd*50; //Move laser away from robot
-      //originY = robot.yPos + robot.ySpd*50;
     }
     
     movers.add(this);
@@ -147,8 +138,6 @@ class Remnant extends MovingThing
   
   public void show()
   {
-    //println("SHOW!!!");
-    
     if(finished) return;
     
     push();
@@ -159,7 +148,7 @@ class Remnant extends MovingThing
     if(laser)
     {
       strokeWeight(laserWidth(robot)/9); //change with laser width
-      if( robot.upgrades.get("Laser 4") )      stroke(200,25,25, opacity);
+      if     ( robot.upgrades.get("Laser 4") ) stroke(200,25,25, opacity);
       else if( robot.upgrades.get("Laser 3") ) stroke(175,25,200,opacity);
       else if( robot.upgrades.get("Laser 2") ) stroke(25,100,200,opacity);
       else                                     stroke(25,200,200,opacity);
@@ -173,13 +162,19 @@ class Remnant extends MovingThing
         scale(-1, 1);
       image(image,0,0,size,size);
     }
-    //if( millis() > expiration )
-    //  finished = true;
+
     pop();
   }
   
   public void move()
   {
+  } 
+  
+  //To keep lasers from vanishing
+  @Override
+  public boolean onScreen()
+  {
+    return true;
   }
   
   public boolean checkExpiration()

@@ -124,7 +124,7 @@ class HUD
       bankedDiscs -= nextUpgrade;
       nextUpgrade += 100;
       installBoxClosing = true;
-      testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
+      wheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
       new GhostWords("Extra Upgrade Unlocked",width*2/3, height-150);
     }
     else
@@ -249,10 +249,10 @@ class HUD
     rectMode(CORNER);
     if(!commsBoxOpening)
     {
-      if( currentIndex[0] < commsBoxText[0].length() && millis() > nextLetterTime[0] )
+      if( currentIndex[0] < commsBoxText[map.level-1].length() && millis() > nextLetterTime[0] )
       {
         nextLetterTime[0] = millis() + 50; //Time between letters
-        currentText += commsBoxText[0].charAt(currentIndex[0]++);
+        currentText += commsBoxText[map.level-1].charAt(currentIndex[0]++);
       }
       text(currentText, 20, 570+commsBoxOffset, 750,1000);
     }

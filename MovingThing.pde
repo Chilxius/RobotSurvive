@@ -121,9 +121,48 @@ public abstract class MovingThing
     else return data.enemyBaseSize;
   }
   
+  public boolean onScreen()
+  {
+    return xPos+data.xOffset > 0 && xPos+data.xOffset < width && yPos+data.yOffset > 0 && yPos+data.yOffset < height;
+  }
+  
   public void destroy()
   {
     finished = true;
   }
   
+  public void setPosition( float x, float y )
+  {
+    xPos = x;
+    yPos = y;
+  }
+  
+  //public BlockState currentBlockState()
+  //{
+  //  int chunkX = int(xPos/(data.blockSize*8));
+  //  int chunkY = int(yPos/(data.blockSize*8));
+  //  int blockX = int(xPos%(map.mapSize*8)/data.blockSize);
+  //  int blockY = int(yPos%(map.mapSize*8)/data.blockSize);
+    
+  //  return map.chunkGrid[chunkX][chunkY].blockGrid[blockX][blockY].state;
+  //}
+  
+  public BlockState currentBlockState()
+  {
+    int chunkSize = int(data.blockSize * 8); // pixel size of one chunk
+
+    float adjX = xPos + data.blockSize / 2.0;
+    float adjY = yPos + data.blockSize / 2.0;
+
+    int chunkX = int(adjX / chunkSize);
+    int chunkY = int(adjY / chunkSize);
+
+    float localX = adjX % chunkSize;
+    float localY = adjY % chunkSize;
+
+    int blockX = int(localX / data.blockSize);
+    int blockY = int(localY / data.blockSize);
+
+    return map.chunkGrid[chunkX][chunkY].blockGrid[blockX][blockY].state;
+  }
 }

@@ -2,9 +2,12 @@
 //Robots vs Vampires
 
 //NEXT: 
-//      Main menu
-//      Scripting
-//      Help messages
+//      Scripting - enemy spawn logic
+// Get steps-to-spawn working for life-force door
+// Get level setup details working
+// Get eleveator unlock working
+// Think about final boss
+
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
@@ -40,19 +43,22 @@ int mapLevel = 1;
 
 Title title;
 
-//Enemy testEnemy, testEnemy2;
-
 StateManager manager = new StateManager();
-GameData data;// = new GameData();
+GameData data;
 
 ArrayList<MovingThing> movers = new ArrayList<MovingThing>();
 ArrayList<MovingThing> trails = new ArrayList<MovingThing>();
-//ArrayList<MovingThing> projectiles = new ArrayList<MovingThing>();
 ArrayList<GhostWords> ghostWords = new ArrayList<GhostWords>();
 
 color dangerColor = color(0,0,200);
 
-ChoiceWheel testWheel;
+ChoiceWheel wheel;
+
+GameOver gameOver;
+int continues = 3;
+
+//Hold to turn, direction changes, press to spin wheel, press to slow wheel, hold to grab wheel
+boolean [] helpMessageShown = {false,false,false,false,false};
 
 void setup()
 {
@@ -72,7 +78,6 @@ void setup()
   data.loadImages();
   
   hud = new HUD();
-  title = new Title();
   
   upgradeTree = new RootNode<>( new Upgrade("Root") );
   buildTree();
@@ -84,6 +89,8 @@ void setup()
   robot = new Robot("test", this);
   createUpgradeTree(robot);
   
+  title = new Title();
+  
   setupTestingStuff();
 }
 
@@ -92,10 +99,11 @@ void draw()
   background(0);
   manager.display();
   
-  fill(255);
-  textSize(50);
-  text(movers.size(),100,100);
-  text(robot.discActive+"",100,200);
+  //fill(255);
+  //textSize(50);
+  //text(robot.currentBlockState()+"",width/2,height/2);
+  //text(robot.discActive+"",100,200);
+  //reportOnMovers();
 }
 
 public void handleGhostWords()
@@ -107,6 +115,7 @@ public void handleGhostWords()
     ghostWords.get(i).show();
     if(ghostWords.get(i).timer < millis())
     {
+      ghostWords.get(i).checkForFollowup();
       ghostWords.remove(i);
       i--;
     }
@@ -118,7 +127,8 @@ public void showAllMovers()
 {
   //Vampire trails
   for( MovingThing m: trails )
-    m.show();
+    if( m.onScreen() )
+      m.show();
     
   ArrayList<MovingThing> sorted = new ArrayList<MovingThing>(movers);
   
@@ -130,7 +140,8 @@ public void showAllMovers()
   });
   
   for (MovingThing o : sorted)
-    o.show();
+    if( o.onScreen() )
+      o.show();
 }
 
 public void moveAllMovers()
@@ -293,10 +304,33 @@ public boolean checkForBlast( Projectile p )
   return true;
 }
 
+public void reportOnMovers()
+{
+  ArrayList<MovingThing> moversOnScreen = new ArrayList<MovingThing>();
+  for(MovingThing m: movers)
+    if( m.onScreen() )
+      moversOnScreen.add(m);
+  textAlign(LEFT);
+  text("Movers: " + movers.size() + " / On Screen: " + moversOnScreen.size(), 100, 100 );
+}
+
 public void clearMovers()
 {
   movers.clear();
   movers.add(robot);
+}
+
+public void addHelpMessage( int index )
+{
+  if( helpMessageShown[index] ) return;
+  
+  helpMessageShown[index] = true;
+  
+  if( index == 0 ) ghostWords.add( new GhostWords("Hold to Turn",                    width/2,  height-150) );
+  if( index == 1 ) ghostWords.add( new GhostWords("Direction Changes With Each Turn",width/2,  height-100) );
+  if( index == 2 ) ghostWords.add( new GhostWords("Press to Spin Wheel",             width*2/3,height-150) );
+  if( index == 3 ) ghostWords.add( new GhostWords("Press to Slow Wheel",             width*2/3,height-125) );
+  if( index == 4 ) ghostWords.add( new GhostWords("Hold to Grab Wheel",              width*2/3,height-100) );
 }
 
 public void mousePressed(){keyPressed();}
@@ -325,9 +359,10 @@ public void keyPressed()
   //  robot.activateUpgrade("Multi-Disc 3");
   //if( key == ' ' )
   //{
-  //  movers.add( new Enemy( new ZombieBehavior(), robot, 1 ) );
-  //  movers.get( movers.size()-1 ).xPos = 1200;
-  //  movers.get( movers.size()-1 ).yPos = 1050;
+  //  //setupTestingStuff();
+  //  //map.spawnEnemy( new ZombieBehavior(), 1, 1 );
+  //  //gameOver = new GameOver();
+  //  map.randomSpawn( new RatBehavior(), 5 );
   //}
   //if( key == 'q' )
   //  new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
@@ -364,6 +399,7 @@ public void setupTestingStuff()
   //robot.activateUpgrade("Laser 1");
   //robot.activateUpgrade("Razor Disc 1");
   //robot.activateUpgrade("Missile 1");
+  //robot.activateUpgrade("Demolition Missile");
   
   
   //movers.add(robot);

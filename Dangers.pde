@@ -170,8 +170,10 @@ class BrainBlast extends MovingThing implements Danger
   @Override
   public void bounce(Block b)
   {
-    if( millis() > duration )
-      finished = true;
+    //if( millis() > duration )
+    //  finished = true;
+    b.demolish();
+    finished = true;
   }
   
   public boolean checkExpiration()

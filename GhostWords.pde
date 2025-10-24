@@ -5,14 +5,16 @@ class GhostWords
   int size;
   String words;
   color col;
+  boolean isText;
   
   GhostWords( String s, float x, float y )
   {
+    isText = true;
     words = s;
     xPos = x;
     yPos = y;
     size = 75;
-    timer = millis()+2000;
+    timer = millis()+2500;
     col = color(255);
     
     ghostWords.add(this);
@@ -35,7 +37,18 @@ class GhostWords
     fill(col);
     textSize(size);
     textAlign(CENTER);
-    text( words, xPos+data.xOffset, yPos+data.yOffset );
+    if(isText)
+      text( words, xPos, yPos );
+    else
+      text( words, xPos+data.xOffset, yPos+data.yOffset );
     yPos-=0.1;
+  }
+  
+  public void checkForFollowup()
+  {
+    if( words.equals("Hold to Turn") )
+      ghostWords.add( new GhostWords("Direction Changes With Each Turn",width/2,height-100) );
+    if( words.equals("Press to Slow Wheel") )
+      ghostWords.add( new GhostWords("Hold to Grab Wheel", width*2/3,height-100) );
   }
 }

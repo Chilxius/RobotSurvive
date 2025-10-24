@@ -36,8 +36,6 @@ public color colorByCategory(UpgradeCategory category)
   }
 }
 
-
-
 public UpgradeCategory categoryByName( String name )
 {
   switch(name)
@@ -92,6 +90,7 @@ public UpgradeCategory categoryByName( String name )
     case "Blast Radius 1":
     case "Blast Radius 2":
     case "Bouncing Missile":
+    case "Demolition Missile":
       return UpgradeCategory.MISSILE;
     
     case "Razor Disc 1":

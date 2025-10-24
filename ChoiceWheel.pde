@@ -41,6 +41,8 @@ class ChoiceWheel
   
   public void show()
   {
+    addHelpMessage(2);
+    
     push();
     translate(xPos,yPos);
     
@@ -144,6 +146,7 @@ class ChoiceWheel
     {  
       //Wheel is ready to spin
       case START:
+        addHelpMessage(3);
         if(pressed)
         {
           touched = true;
@@ -160,6 +163,7 @@ class ChoiceWheel
       
       //Wheel is slowing by its own friction
       case SLOWING:
+        //addHelpMessage(4);
         if(touched)
           state = WheelState.GRABBED;
         break;

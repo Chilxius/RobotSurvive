@@ -20,6 +20,7 @@ class MenuState implements GameState
   void goToSurvival(StateManager manager)
   {
     clearMovers();
+    addHelpMessage(0);
     manager.setState( new SurvivalState() );
   }
   void goToUpgrade(StateManager manager)
@@ -65,7 +66,7 @@ class SurvivalState implements GameState
     manager.setState( new UpgradeState() );
     data.xOffset = data.yOffset = 0;
     //testWheel.buildWheel(4);
-    testWheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
+    wheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
   }
   void goToBreakdown(StateManager manager)
   {
@@ -95,17 +96,20 @@ class SurvivalState implements GameState
     
     if( map.fade >= 255 )
     {
-      map = new Map(++mapLevel);
+      //map = new Map(++mapLevel);
       
       manager.goToUpgrade();
     
-      robot.xPos = map.startingPoint('x');
-      robot.yPos = map.startingPoint('y');
+      //robot.xPos = map.startingPoint('x');
+      //robot.yPos = map.startingPoint('y');
     }
     
     hud.display(false);
     
     handleGhostWords();
+    
+    if( map.firstSpawn )
+      map.initialSpawn();
   }
   
   void reactToPress()
@@ -128,7 +132,12 @@ class UpgradeState implements GameState
   void goToSurvival(StateManager manager)
   {
     clearMovers();
+    map = new Map(++mapLevel);
+    //Place robot at starting point
+    robot.xPos = map.startingPoint('x');
+    robot.yPos = map.startingPoint('y');
     manager.setState( new SurvivalState() );
+    //map.initialSpawn();
   }
   void goToUpgrade(StateManager manager)
   {
@@ -141,8 +150,8 @@ class UpgradeState implements GameState
   
   void display()
   {
-    testWheel.show();
-    testWheel.spin();
+    wheel.show();
+    wheel.spin();
     hud.display(true);
     if( robot.armor < robot.getMaxArmor() )
       robot.armor++;
@@ -151,12 +160,12 @@ class UpgradeState implements GameState
   
   void reactToPress()
   {
-    testWheel.pressReact(true);
+    wheel.pressReact(true);
   }
   
   void reactToRelease()
   {
-    testWheel.pressReact(false);
+    wheel.pressReact(false);
   }
 }
 
@@ -181,10 +190,12 @@ class BreakdownState implements GameState
   
   void display()
   {
+    gameOver.show();
   }
   
   void reactToPress()
   {
+    gameOver.tryAgain();
   }
   
   void reactToRelease()

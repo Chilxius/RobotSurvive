@@ -25,6 +25,9 @@ class Laser extends MovingThing
     measure();
     
     movers.add(this);
+    
+    //TESTING
+    //ghostWords.add( new GhostWords("ZAP",random(width),random(height) ) );
   }
   
   private int stepCount( Robot r )
@@ -125,7 +128,7 @@ class Laser extends MovingThing
   
   public boolean checkExpiration()
   {
-    
     return false;
   }
+
 }
