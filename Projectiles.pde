@@ -53,7 +53,7 @@ class Missile extends MovingThing implements Projectile
         xSpd += xAcc;
       else
         xSpd -= xAcc;
-      if( target.yPos > yPos )
+      if( target.hitBox() > yPos )
         ySpd += yAcc;
       else
         ySpd -= yAcc;

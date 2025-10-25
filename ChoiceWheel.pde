@@ -192,7 +192,12 @@ class ChoiceWheel
       {
         searches++;
         
-        Node<Upgrade> current = upgradeTree.children.get( int(random(upgradeTree.children.size())));
+        Node<Upgrade> current;
+        
+        if( map.level == 1 )
+          current = upgradeTree.children.get( int(random(3))+2 );
+        else
+          current = upgradeTree.children.get( int(random(upgradeTree.children.size())));
         
         while( true ) //Iterate down random tree path
         {

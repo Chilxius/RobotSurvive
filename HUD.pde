@@ -387,21 +387,22 @@ class HUD
   {
     return new String[]
     {
-      "This is the first test output string. These words should fill up the box until the string is finished. Buy Robots vs Vampires from your local Blockbuster today!",
-      "Second string",
-      "Third string",
-      "4 string",
-      "5 string",
-      "6 string",
-      "7 string",
-      "8 string",
-      "9 string",
-      "10 string",
-      "11 string",
-      "12 string",
-      "13 string",
-      "14 string",
-      "15 string"
+/*0*/ "ArtificeEnforcer, I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
+/*1*/ "This is the first test output string. These words should fill up the box until the string is finished. Buy Robots vs Vampires from your local Blockbuster today!",
+/*2*/ "Second string",
+/*3*/ "Third string",
+/*4*/ "4 string",
+/*5*/ ""+robot.getShortName()+", I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
+/*6*/ "6 string",
+/*7*/ "7 string",
+/*8*/ "8 string",
+/*9*/ "9 string",
+/*0*/ "10 string",
+/*1*/ "11 string",
+/*2*/ "12 string",
+/*3*/ "13 string",
+/*4*/ "14 string",
+/*5*/ "15 string"
     };
   }
 }

@@ -175,7 +175,9 @@ class Enemy extends MovingThing
     health -= amount;
     new GhostWords( amount, xPos, yPos );
     if( health < 0 )
+    {
       dead = true;
+    }
     else //minor slow
     {
       xSpd *= 0.5;
@@ -190,6 +192,11 @@ class Enemy extends MovingThing
       finished = true;
       new Remnant(this);
       dropPickups();
+      if(behavior.boss)
+        map.totalBosses++;
+      else
+        map.totalEnemies++;
+      map.checkMapRequirements();
       return true;
     }
     return false;

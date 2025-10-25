@@ -1,4 +1,4 @@
-PImage titlePic,tile,wall,ruin,cap,grid,decor[],exit,girder,g_back,g_front,floppy,staticPic,shieldPic,shieldPic2,bigFacePic,token;
+PImage titlePic,tile,wall,ruin,cap,grid,decor[],exit1,exit2,girder,g_back,g_front,floppy,staticPic,shieldPic,shieldPic2,bigFacePic,token;
 
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
@@ -62,8 +62,10 @@ class GameData
     cap.resize(int(data.blockSize),0);
     grid = loadImage("doorGrid3.png");
     grid.resize(int(data.blockSize),0);
-    exit = loadImage("exit.png");
-    exit.resize(int(data.blockSize),0);
+    exit1 = loadImage("exitRed.png");
+    exit1.resize(int(data.blockSize),0);
+    exit2 = loadImage("exitGreen.png");
+    exit2.resize(int(data.blockSize),0);
     girder = loadImage("girder2.png");
     girder.resize(int(data.blockSize),0);
     g_back = loadImage("girder_back.png");

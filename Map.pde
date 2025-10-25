@@ -25,6 +25,10 @@ class Map
   
   boolean canLeave;
   
+  int requiredDiscs, totalDiscs;
+  int requiredBosses, totalBosses;
+  int requiredEnemies, totalEnemies;
+  
   Map( int l )
   {
     level = l;
@@ -42,9 +46,12 @@ class Map
     fillClosedRooms();
     //addCaps();
     createExit();
+    setupRequirements();
     
     //initialSpawn();
     firstSpawn = true;
+    
+    checkMapRequirements();
   }
   
   private void createBarriers()
@@ -460,10 +467,119 @@ class Map
     pop();
   }
   
+  public void checkMapRequirements()
+  {
+    if( canLeave ) return;
+    
+    if( totalDiscs >= requiredDiscs && totalBosses >= requiredBosses && totalEnemies >= requiredEnemies )
+      canLeave = true;
+      //sound effect
+  }
+  
   //Spawn, moving from exit
   public void spawnEnemies( EnemyBehavior b, int amount )
   {
+    //For each enemy...
+    for( int i = 0; i < amount; i++ )
+    {
+      //Steps from corner to corner (8 changed to 7 to keep enemies from spawning too close to start point)
+      int steps = (mapSize*2-2) * 7;
+      println("size: " + mapSize + " / steps: " + ((mapSize*2-2)*7));
+      
+      //Chunk x, y    Block x, y
+      int [] blockPos = { mapSize-1, 0, 4, 3 };
+      int [] lastPos  = { 0,0,0,0 };
+      
+      //For each step...
+      for( int j = 0; j < steps; j++ )
+        if( takeStep( blockPos, lastPos ) ) //attempt to step
+          j--;
+
+      spawnEnemy( b, blockPos[0], blockPos[1] );
+    }
+  }
+  
+  private boolean takeStep( int [] pos, int [] last )
+  {//                 cX     cY     bX     bY
+    int [] step = {pos[0],pos[1],pos[2],pos[3]};
     
+    //60% to move down or left, 40% to move up or right
+    int dir = int(random(10));
+    if( dir < 3 ) //down
+    {
+      step[3]++;
+      if( step[3]==8 ){ step[3] = 4; step[1]++; }
+      
+      if( !(chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.SOLID
+         || chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.BORDER )
+         && !( step[0]==last[0] && step[1]==last[1] && step[2]==last[2] && step[3]==last[3] ) )
+      {
+        for (int i = 0; i < 4; i++) //Update positions
+        {
+            last[i] = pos[i];
+            pos[i] = step[i];
+        }
+        return true;
+      }
+      else return false;
+    }
+    else if( dir < 6 ) //left
+    {
+      step[2]--;
+      if( step[2]==-1 ){ step[2] = 3; step[0]--; }
+      
+      if( !(chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.SOLID
+         || chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.BORDER )
+         && !( step[0]==last[0] && step[1]==last[1] && step[2]==last[2] && step[3]==last[3] ) )
+      {
+        for (int i = 0; i < 4; i++) //Update positions
+        {
+            last[i] = pos[i];
+            pos[i] = step[i];
+        }
+        return true;
+      }
+      else return false;
+    }
+    else if( dir < 8 ) //up
+    {
+      step[3]--;
+      if( step[3]==-1 ){ step[3] = 4; step[1]--; }
+      
+      if( !(chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.SOLID
+         || chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.BORDER )
+         && !( step[0]==last[0] && step[1]==last[1] && step[2]==last[2] && step[3]==last[3] ) )
+      {
+        for (int i = 0; i < 4; i++) //Update positions
+        {
+            last[i] = pos[i];
+            pos[i] = step[i];
+        }
+        return true;
+      }
+      else return false;
+    }
+    else if( dir < 10 ) //right
+    {
+      step[2]++;
+      if( step[2]==8 ){ step[2] = 3; step[0]++; }
+      
+      if( !(chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.SOLID
+         || chunkGrid[step[0]][step[1]].blockGrid[step[2]][step[3]].state == BlockState.BORDER )
+         && !( step[0]==last[0] && step[1]==last[1] && step[2]==last[2] && step[3]==last[3] ) )
+      {
+        for (int i = 0; i < 4; i++) //Update positions
+        {
+            last[i] = pos[i];
+            pos[i] = step[i];
+        }
+        return true;
+      }
+      else return false;
+    }
+    
+    println("Picked strange direction: " + dir);
+    return false;
   }
   
   //Specific enemy at specific chunk
@@ -479,12 +595,12 @@ class Map
     for( int i = 0; i < amount; i++ )
     {
       int x,y;
-      do{ x = int(random(mapSize)); y = int(random(mapSize)); println("top"); }
+      do{ x = int(random(mapSize)); y = int(random(mapSize)); }
       while( chunkGrid[x][y].blockGrid[3][3].state != BlockState.OPEN ); 
       
       spawnEnemy( b, x, y );
       while( movers.get(movers.size()-1).onScreen() || movers.get(movers.size()-1).currentBlockState()==BlockState.SOLID || movers.get(movers.size()-1).currentBlockState()==BlockState.BORDER )
-      { movers.get(movers.size()-1).setPosition(random(mapSize*data.blockSize),random(mapSize*data.blockSize) ); println("bottom"); }
+      { movers.get(movers.size()-1).setPosition(random(mapSize*data.blockSize),random(mapSize*data.blockSize) ); }
     }
   }
   
@@ -503,28 +619,126 @@ class Map
       case 3:
         randomSpawn( new RatBehavior(), 5 );
         break;
+        
+      case 4:
+        spawnEnemy( new BrainBehavior(), 0, 0 );
     }
   }
   
-  //Based on map level - spawned halfway through
-  public void levelSpawn()
-  {
-    switch(level)
-    {
-      case 1:
-        break;
+  ////Based on map level - spawned halfway through
+  //public void levelSpawn()
+  //{
+  //  switch(level)
+  //  {
+  //    case 1:
+  //      break;
         
-      case 2:
+  //    case 2:
         
-        break;
+  //      break;
         
-    }
-  }
+  //  }
+  //}
   
   //Level type
-  public void initialSetup()
-  {
-    
+  public void setupRequirements()    //1  - Learn to walk  2x2
+  {                                  //2  - Some Rats to fight 3x3
+    switch(level)                    //3  - Zombies (get discs) 3x3
+    {                                //4  - Zombie horde (kill zoms) 4x4
+      case 1:                        //5  - Banshee & ghosts (kill boss) 4x4
+        requiredBosses = 0;          //6  - Skeletons (kill skeletons) 5x5
+        requiredEnemies = 0;         //7  - SkeletalMonster (kill boss) 5x5
+        requiredDiscs = 0;           //8  - Flood of enemies, ghouls? and wraiths?, multiple bosses?, one vampire? (get discs) 6x6
+        break;                       //9  - 
+                                     //10 - BRAIN (kill boss) 7x7
+      //Some rats                    //11 - Vamps
+      case 2:                        //12 - 
+        requiredBosses = 0;          //13 - 
+        requiredEnemies = 2;         //14 - Vampire Countess
+        requiredDiscs = 0;           //15 - Final boss
+        break;
+/*
+Ghost, Zombie, Skeleton, Rats, Mummy, Ghoul, Vampire, Wraith
+Banshee, Dino Skeleton, Brain in a Jar, Lich, Vampire Mage
+*/
+      case 3:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 4:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 5:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 6:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 7:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 8:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 9:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 10:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 11:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 12:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 13:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 14:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+        
+      case 15:
+        requiredBosses = 0;
+        requiredEnemies = 2;
+        requiredDiscs = 0;
+        break;
+    }
   }
 }
 
@@ -656,7 +870,10 @@ class Block
       }
       if( state == BlockState.EXIT )
       {
-        image(exit,xPos+data.xOffset,yPos+data.yOffset);
+        if( map.canLeave )
+          image(exit2,xPos+data.xOffset,yPos+data.yOffset);
+        else
+          image(exit1,xPos+data.xOffset,yPos+data.yOffset);
       }
       if( state == BlockState.OPEN && decoration != -1 )
         image(decor[decoration],xPos+data.xOffset,yPos+data.yOffset);

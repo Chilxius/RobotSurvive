@@ -2,10 +2,8 @@
 //Robots vs Vampires
 
 //NEXT: 
-//      Scripting - enemy spawn logic
-// Get steps-to-spawn working for life-force door
-// Get level setup details working
-// Get eleveator unlock working
+//      Scripting - enemy spawn logic and text
+//      Damage
 // Think about final boss
 
 
@@ -77,7 +75,6 @@ void setup()
   data = new GameData();
   data.loadImages();
   
-  hud = new HUD();
   
   upgradeTree = new RootNode<>( new Upgrade("Root") );
   buildTree();
@@ -89,6 +86,8 @@ void setup()
   robot = new Robot("test", this);
   createUpgradeTree(robot);
   
+  hud = new HUD();
+  
   title = new Title();
   
   setupTestingStuff();
@@ -99,9 +98,11 @@ void draw()
   background(0);
   manager.display();
   
-  //fill(255);
-  //textSize(50);
-  //text(robot.currentBlockState()+"",width/2,height/2);
+  fill(255);
+  textSize(50);
+  text((map.totalEnemies + " \\ " + map.requiredEnemies), width/2, height/2-50);
+  text((map.totalBosses + " \\ " + map.requiredBosses), width/2, height/2);
+  text((map.totalDiscs + " \\ " + map.requiredDiscs), width/2, height/2+50);
   //text(robot.discActive+"",100,200);
   //reportOnMovers();
 }
@@ -217,6 +218,8 @@ public void checkAllMoversForHits()
         if( movers.get(j) instanceof Pickup && movers.get(i).intersects(movers.get(j)) )
         {
           robot.cash++;
+          map.totalDiscs++;
+          map.checkMapRequirements();
           movers.get(j).finished=true;
         }
         //Hit by enemy
@@ -357,13 +360,16 @@ public void keyPressed()
   //  robot.activateUpgrade("Multi-Disc 2");
   //if( key == '3' )
   //  robot.activateUpgrade("Multi-Disc 3");
-  //if( key == ' ' )
-  //{
-  //  //setupTestingStuff();
-  //  //map.spawnEnemy( new ZombieBehavior(), 1, 1 );
-  //  //gameOver = new GameOver();
-  //  map.randomSpawn( new RatBehavior(), 5 );
-  //}
+  if( key == ' ' )
+  {
+    //setupTestingStuff();
+    //map.spawnEnemy( new ZombieBehavior(), 1, 1 );
+    //gameOver = new GameOver();
+    //map.randomSpawn( new RatBehavior(), 5 );
+    //map.spawnEnemies( new ZombieBehavior(), 6 );
+    //robot.cash++;
+    //map.totalDiscs++;
+  }
   //if( key == 'q' )
   //  new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
   //if( key == 'w' )
