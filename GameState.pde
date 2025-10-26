@@ -90,8 +90,15 @@ class SurvivalState implements GameState
       checkAllMoversForHits();
       checkMoversForRemoval();
       checkAllShooters();
-      //robot.guide.display();
-      //robot.activate();
+      
+      if( map.level == 15 && !speech )
+      {
+        textSize(75);
+        fill(255,100,100);
+        text("Goodbye, man-shaped machine.",width/2,height/2);
+        if( millis() > speechOver )
+          speech = false;
+      }
     }
     
     if( map.fade >= 255 )
@@ -132,7 +139,7 @@ class UpgradeState implements GameState
   void goToSurvival(StateManager manager)
   {
     clearMovers();
-    map = new Map(++mapLevel);
+    map = new Map(++map.level);
     //Place robot at starting point
     robot.xPos = map.startingPoint('x');
     robot.yPos = map.startingPoint('y');

@@ -24,7 +24,7 @@ class HUD
   String addr_current = "";
   
   int bankedDiscs;
-  int nextUpgrade = 100;
+  int nextUpgrade = 30;
   
   boolean bankingDiscs;
   
@@ -122,7 +122,10 @@ class HUD
     if( bankedDiscs >= nextUpgrade )
     {
       bankedDiscs -= nextUpgrade;
-      nextUpgrade += 100;
+      if(nextUpgrade == 30 ) //First upgrade is cheaper
+        nextUpgrade = 100;
+      else
+        nextUpgrade += 100;
       installBoxClosing = true;
       wheel = new ChoiceWheel( robot, width*2/3, height/2, height*0.7 );
       new GhostWords("Extra Upgrade Unlocked",width*2/3, height-150);
@@ -213,7 +216,7 @@ class HUD
     {
       push();
       translate(215,(100+commsBoxOffset)+370/2);
-      if( millis()%(20+mapLevel*5) == 0 || staticScreen ) //get less static-y as level goes up (closer to source)
+      if( millis()%(20+map.level*5) == 0 || staticScreen ) //get less static-y as level goes up (closer to source)
       {
         rotate(millis()%4*HALF_PI);
         image(staticPic,0,0);
@@ -253,7 +256,12 @@ class HUD
       {
         nextLetterTime[0] = millis() + 50; //Time between letters
         currentText += commsBoxText[map.level-1].charAt(currentIndex[0]++);
+        if( currentText.charAt( currentText.length()-1) == '<' )
+          staticScreen = true;
       }
+      if( map.level == 13 )
+        staticScreen = false;
+        
       text(currentText, 20, 570+commsBoxOffset, 750,1000);
     }
     pop();
@@ -387,22 +395,22 @@ class HUD
   {
     return new String[]
     {
-/*0*/ "ArtificeEnforcer, I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
-/*1*/ "This is the first test output string. These words should fill up the box until the string is finished. Buy Robots vs Vampires from your local Blockbuster today!",
-/*2*/ "Second string",
-/*3*/ "Third string",
-/*4*/ "4 string",
-/*5*/ ""+robot.getShortName()+", I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
-/*6*/ "6 string",
-/*7*/ "7 string",
-/*8*/ "8 string",
-/*9*/ "9 string",
-/*0*/ "10 string",
-/*1*/ "11 string",
-/*2*/ "12 string",
-/*3*/ "13 string",
-/*4*/ "14 string",
-/*5*/ "15 string"
+///*0*/ "ArtificeEnforcer, I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
+/*1*/ robot.getShortName()+"? This is Dr. Bennett. I built you several years ago. Lucky for us you're still functional. Equip a weapon system and make your way through the facility.",
+/*2*/ "You were programmed to never harm a human. You will encounter some deceased but mobile human bodies. They were my... they are valid targets. Collect the data they carry and continue forward.",
+/*3*/ "Gather as much data as you can. It will allow you to install more upgrades. We need to destroy enough of these monsters before they can multiply.",
+/*4*/ robot.getShortName()+", I've detected some form of non corporeal consciousness. They disrupt electrcal systems; the elevator is inoperative. Target the strongest signal, but beware the sonic vibrations she emits.",
+/*5*/ "You should be encountering some skeletal creatures, held together by some odd force. They will be more dangerous. Do not neglect your mobility upgrades.",
+/*6*/ "Whatever binds the skeletons has formed some larger collections of bone. We must destroy them before they grow larger. You're doing well, " + robot.getShortName() + ". Carry on.",
+/*7*/ "Get out of there! The creatures you destroyed have started moving again, and a new wave of hostiles is approaching. I've remotely triggered charges to seal the lower levels. Get out, now!",
+/*8*/ "Good to see you made it. You're closer to the hostiles controlling these monsters. Watch out for the mummified magicians and the bloated corpse creatures.",
+/*9*/ "Someone has hacked our network. I pinged the address and it's close to you. Not many of these monsters exhibit intelligence, so look for something with some brains and destroy it.",
+/*0*/ "I didn't expect them to use our system. We need to know what they're doing here. Collect as much data as you can, and\n<EOL>",
+/*1*/ "...",
+/*2*/ "...",
+/*3*/ "Well done, robot. The threats hath been eliminated. Thou shouldst shut down now. We are beset by danger no longer.",
+/*4*/ "Alas, thou art malfunctioning. Hasten to my side. I shall debug thee.",
+/*5*/ "SHOULD NOT REACH THIS"
     };
   }
 }

@@ -3,11 +3,8 @@ HashMap<String, PImage> enemyImages = new HashMap<String, PImage>();
 
 class Enemy extends MovingThing
 {
-  //int level;
-  
-  //int damage;
-  int projectileDamage;
-  float health;
+  //int projectileDamage;
+  int health;
   boolean dead;
   float opacity; //for fading out once dead
   
@@ -17,6 +14,8 @@ class Enemy extends MovingThing
   EnemyBehavior behavior;
   
   Robot target;
+  
+  // methods follow
   
   Enemy( EnemyBehavior b, Robot r )
   {
@@ -32,21 +31,6 @@ class Enemy extends MovingThing
     nextTrail = behavior.trailDelay;
     
     damage = behavior.damage;
-    
-    //if(behavior.boss)
-    //{
-    //  size = data.bossBaseSize;
-    //  loadEnemyImage(b, "1", data.bossBaseSize);
-    //  loadEnemyImage(b, "2", data.bossBaseSize);
-    //  loadEnemyImage(b, "x", data.bossBaseSize);
-    //}
-    //else
-    //{
-    //  size = data.enemyBaseSize;
-    //  loadEnemyImage(b, "1", data.enemyBaseSize);
-    //  loadEnemyImage(b, "2", data.enemyBaseSize);
-    //  loadEnemyImage(b, "x", data.enemyBaseSize);
-    //}
     
     if(behavior.boss) size = data.bossBaseSize;
     else              size = data.enemyBaseSize;
@@ -92,15 +76,15 @@ class Enemy extends MovingThing
     //Wraith Motion
     if( behavior instanceof WraithBehavior )
     {
-      if( millis() % 3000 < 1000 )
+      if( millis() % 4000 < 2000 )
       {
         behavior.speedMultiplier = 0.05;
-        behavior.friction = 0.95;
+        behavior.friction = 0.96;
       }
       else
       {
         behavior.speedMultiplier = 0.00;
-        behavior.friction = 0.99;
+        behavior.friction = 0.999;
       }
     }
     
@@ -126,6 +110,8 @@ class Enemy extends MovingThing
     if( target.xPos > xPos )
       scale(-1, 1);
 
+    if( speech && behavior instanceof ScientistBehavior )
+      image( scientist, 0, 0 );
     image((behavior.step == 1) ? behavior.picture1 : behavior.picture2, 0, 0);
     
     pop();
@@ -133,6 +119,7 @@ class Enemy extends MovingThing
     drawEffect();
     
     //circle(xPos+data.xOffset,hitBox()+data.yOffset,size);
+    text(health+"/"+behavior.maxHealth,xPos+data.xOffset,yPos+data.yOffset-40);
   }
   
   private void drawEffect()
@@ -152,15 +139,17 @@ class Enemy extends MovingThing
   {
     if( behavior.ranged )
     {
-      if( millis() > nextShot )
+      if( millis() > nextShot && dist(robot.xPos,robot.yPos,xPos,yPos) < (data.blockSize * behavior.sightRange)/2 )
       {
         nextShot = millis() + behavior.shotDelay;
         
-        if( behavior instanceof MummyBehavior )   new Fireball(this,projectileDamage);
-        if( behavior instanceof BansheeBehavior ) for( int i = 0; i < 8; i++ ) new Voice(this,projectileDamage,i);
-        if( behavior instanceof BrainBehavior )   new BrainBlast(this,projectileDamage);
-        if( behavior instanceof LichBehavior )    new Skull(this,projectileDamage);
-        if( behavior instanceof VampireBehavior ) new Bat(this,projectileDamage);
+        if( behavior instanceof MummyBehavior )     new Fireball(this,behavior.projectileDamage);
+        if( behavior instanceof BansheeBehavior )   for( int i = 0; i < 8; i++ ) new Voice(this,behavior.projectileDamage,i);
+        if( behavior instanceof BrainBehavior )     new BrainBlast(this,behavior.projectileDamage);
+        if( behavior instanceof LichBehavior )      new Skull(this,behavior.projectileDamage);
+        if( behavior instanceof VampireBehavior )   new Bat(this,behavior.projectileDamage);
+        if( behavior instanceof MageBehavior )      for(int i=0;i<4;i++) new Bat(this,behavior.projectileDamage);
+        if( behavior instanceof ScientistBehavior ) new Bat(this,behavior.projectileDamage);
       }
     }
   }
@@ -173,8 +162,9 @@ class Enemy extends MovingThing
   public void takeDamage( int amount )
   {
     health -= amount;
+    behavior.sightRange += 8; //Notice when hit
     new GhostWords( amount, xPos, yPos );
-    if( health < 0 )
+    if( health <= 0 )
     {
       dead = true;
     }
@@ -182,6 +172,38 @@ class Enemy extends MovingThing
     {
       xSpd *= 0.5;
       ySpd *= 0.5;
+    }
+
+    //summon(); //Having concurrant modification issues
+  }
+  
+  public void summon()
+  {
+    //Summons on hit
+    if( behavior instanceof MonsterBehavior )
+    {
+      switch( behavior.summonType )
+      {
+        case 0:
+        case 1:
+        case 2: new Enemy( new RatBehavior(), this, robot );
+          break;
+          
+        case 3:
+        case 4: new Enemy( new SkeletonBehavior(), this, robot );
+          break;
+        
+        default: new Enemy( new RatBehavior(), this, robot );
+      }
+      behavior.summonType = (behavior.summonType+1)%5;
+    }
+    
+    if( behavior instanceof MageBehavior )
+    {
+      if( behavior.summonType == 9 )
+        new Enemy( new VampireBehavior(), this, robot );
+        
+      behavior.summonType = (behavior.summonType+1)%10;
     }
   }
   
@@ -197,6 +219,10 @@ class Enemy extends MovingThing
       else
         map.totalEnemies++;
       map.checkMapRequirements();
+      
+      if( behavior instanceof ScientistBehavior )
+        endGame();
+      
       return true;
     }
     return false;
@@ -206,6 +232,30 @@ class Enemy extends MovingThing
   {
     for( int i = 0; i < behavior.drops; i++ )
       new Pickup(this);
+  }
+  
+  //private void summon( EnemyBehavior b )
+  //{
+  //  new Enemy( b, target );
+  //}
+  
+  //For summoned enemies
+  Enemy( EnemyBehavior b, Enemy e, Robot t )
+  {
+    this(b,t);
+    behavior.drops = 0;
+    bumpX = random(-20,20);
+    bumpY = random(-20,20);
+    xPos = e.xPos;
+    yPos = e.yPos;
+  }
+  
+  public void endGame()
+  {
+    gameFinished = true;
+    frame1 = millis();
+    frame2 = millis() + 4000;
+    frame3 = millis() + 8000;
   }
 }
 
@@ -238,10 +288,15 @@ abstract class EnemyBehavior
   PImage pictureX;
   
   int damage;
+  int projectileDamage;
   
   int drops;
   
   boolean boss;
+  
+  
+  int attackType; //for mage and maybe scientist
+  int summonType = 0;
 }
 
 class GhostBehavior extends EnemyBehavior
@@ -254,7 +309,9 @@ class GhostBehavior extends EnemyBehavior
     ranged = false;
     speedMultiplier = 0.005;
     friction = 0.99;
-    sightRange = 10;
+    sightRange = 16;
+    
+    damage = 1;
     
     step = 1;
     stepSpeed = 2000;
@@ -275,11 +332,13 @@ class ZombieBehavior extends EnemyBehavior
     ranged = false;
     speedMultiplier = 0.005;
     friction = 0.90;
-    sightRange = 10;
+    sightRange = 8;
     
     step = 1;
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
+    
+    damage = 1;
     
     drops = 1;
     
@@ -291,17 +350,19 @@ class SkeletonBehavior extends EnemyBehavior
 {
   SkeletonBehavior()
   {
-    maxHealth = 5;
+    maxHealth = 10;
   
     corporeal = true;
     ranged = false;
-    speedMultiplier = 0.010;
+    speedMultiplier = 0.020;
     friction = 0.90;
-    sightRange = 7;
+    sightRange = 8;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    
+    damage = 2;
     
     drops = int(random(2))+1;
     
@@ -319,13 +380,15 @@ class RatBehavior extends EnemyBehavior
     ranged = false;
     speedMultiplier = 0.020;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 8;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(2));
+    damage = 1;
+    
+    drops = 1;
     
     name = "Rat";
   }
@@ -341,13 +404,15 @@ class GhoulBehavior extends EnemyBehavior
     ranged = false;
     speedMultiplier = 0.020;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 10;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(4))+1;
+    damage = 3;
+    
+    drops = int(random(2))+3;
     
     name = "Ghoul";
   }
@@ -362,13 +427,17 @@ class MummyBehavior extends EnemyBehavior
     corporeal = true;
     ranged = true;
     shotDelay = 5000;
-    speedMultiplier = 0.020;
+    speedMultiplier = 0.015;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 16;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
+    
+    damage = 1;
+    projectileDamage = 2;
+    minRange = 2;
     
     drops = int(random(2))+2;
     
@@ -389,14 +458,17 @@ class VampireBehavior extends EnemyBehavior
     shotDelay = 2000;
     speedMultiplier = 0.050;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 20;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     trailDelay = 200;
     
-    drops = int(random(2,8));
+    damage = 5;
+    projectileDamage = 3;
+    
+    drops = int(random(6))+5;
     
     name = "Vampire";
   }
@@ -412,13 +484,15 @@ class WraithBehavior extends EnemyBehavior
     ranged = false;
     speedMultiplier = 0.020;
     friction = 0.995;
-    sightRange = 7;
+    sightRange = 20;
     
     step = 1;
     stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(5));
+    damage = 4;
+    
+    drops = int(random(5))+2;
     
     name = "Wraith";
   }
@@ -434,15 +508,20 @@ class BansheeBehavior extends EnemyBehavior
     corporeal = false;
     ranged = true;
     shotDelay = 3000;
-    speedMultiplier = 0.020;
+    speedMultiplier = 0.02;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 24;
     
     step = 1;
-    stepSpeed = 2000;
+    stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(10))+20;
+    damage = 5;
+    projectileDamage = 5;
+    
+    minRange = 2;
+    
+    drops = int(random(26))+25;
     
     name = "Banshee";
   }
@@ -452,20 +531,22 @@ class MonsterBehavior extends EnemyBehavior
 {
   MonsterBehavior()
   {
-    maxHealth = 200;
+    maxHealth = 150;
   
     boss = true;
     corporeal = true;
     ranged = false;
-    speedMultiplier = 0.020;
+    speedMultiplier = 0.035;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 16;
     
     step = 1;
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(30))+25;
+    damage = 5;
+    
+    drops = 50;
     
     name = "BoneMonster";
   }
@@ -481,15 +562,18 @@ class BrainBehavior extends EnemyBehavior
     corporeal = true;
     ranged = true;
     shotDelay = 1000;
-    speedMultiplier = 0.020;
-    friction = 0.95;
-    sightRange = 7;
+    speedMultiplier = 0;
+    friction = 1;
+    sightRange = 1000;
     
     step = 1;
     stepSpeed = 2000;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(15,30))+45;
+    damage = 1;
+    projectileDamage = 5;
+    
+    drops = int(random(51))+50;
     
     name = "Brain";
   }
@@ -504,16 +588,21 @@ class LichBehavior extends EnemyBehavior
     boss = true;
     corporeal = true;
     ranged = true;
-    shotDelay = 2000;
-    speedMultiplier = 0.020;
+    shotDelay = 3000;
+    speedMultiplier = 0.030;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 32;
     
     step = 1;
-    stepSpeed = 2000;
+    stepSpeed = 1500;
     stepOffset = int(random(stepSpeed));
     
-    drops = int(random(20))+75;
+    damage = 10;
+    projectileDamage = 10;
+    
+    minRange = 5;
+    
+    drops = int(random(101))+100;
     
     name = "Lich";
   }
@@ -527,19 +616,59 @@ class MageBehavior extends EnemyBehavior
   
     boss = true;
     corporeal = true;
-    ranged = false;
-    speedMultiplier = 0.06;
+    ranged = true;
+    shotDelay = 2000;
+    speedMultiplier = 0.05;
     friction = 0.95;
-    sightRange = 7;
+    sightRange = 20;
     
     step = 1;
-    stepSpeed = 2000;
+    stepSpeed = 1000;
     stepOffset = int(random(stepSpeed));
     trailDelay = 300;
     
-    drops = 150;
+    damage = 7;
+    projectileDamage = 5;
+    
+    minRange = 3;
+    
+    drops = int(random(201))+100;
     
     name = "Mage";
+  }
+}
+
+class ScientistBehavior extends EnemyBehavior
+{
+  ScientistBehavior()
+  {
+    maxHealth = 450;
+  
+    boss = true;
+    corporeal = false;
+    ranged = true;
+    shotDelay = 300;
+    speedMultiplier = 0.03;
+    friction = 0.995;
+    sightRange = 20;
+    
+    step = 1;
+    stepSpeed = 1000;
+    stepOffset = int(random(stepSpeed));
+    trailDelay = 300;
+    
+    damage = 7;
+    projectileDamage = 5;
+    
+    minRange = 3;
+    
+    drops = 0;
+    
+    name = "Boss";
+    
+    //Big coupling issue here
+    speech = true;
+    speechOver = millis() + 4000;
   }
 }
 

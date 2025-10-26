@@ -263,6 +263,25 @@ class Bat extends MovingThing implements Danger
     movers.add(this);
   }
   
+  Bat(Enemy e, int d, float a )
+  {
+    damage = d;
+    
+    xPos = e.xPos;
+    yPos = e.yPos;
+    
+    float angle = a;
+    
+    xSpd = cos(angle) * 2;
+    ySpd = sin(angle) * 2;
+    
+    size = data.missileSize*2;
+    
+    seekTimer = millis() + 2000;
+    
+    movers.add(this);
+  }
+  
   public void move()
   {
     if( seekTimer > millis() )

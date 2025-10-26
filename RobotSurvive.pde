@@ -1,10 +1,6 @@
 //Game Jam Challenge: One Button
 //Robots vs Vampires
 
-//NEXT: 
-//      Scripting - enemy spawn logic and text
-//      Damage
-// Think about final boss
 
 
 //Get the robot and map un-coupled for end-of-level operations
@@ -37,7 +33,7 @@ RootNode<Upgrade> upgradeTree;
 HUD hud;
 
 Map map;
-int mapLevel = 1;
+//int mapLevel = 1;
 
 Title title;
 
@@ -57,6 +53,12 @@ int continues = 3;
 
 //Hold to turn, direction changes, press to spin wheel, press to slow wheel, hold to grab wheel
 boolean [] helpMessageShown = {false,false,false,false,false};
+
+//For final cutscene
+boolean speech = true;
+int speechOver;
+boolean gameFinished = false;
+int frame1, frame2, frame3;
 
 void setup()
 {
@@ -96,13 +98,25 @@ void setup()
 void draw()
 {
   background(0);
+  
+  if( gameFinished )
+  {
+    if( millis() > frame3 )
+      image( end3, width/2, height/2 );
+    else if( millis() > frame2 )
+      image( end2, width/2, height/2 );
+    else if( millis() > frame1 )
+      image( end1, width/2, height/2 );
+    return;
+  }
+  
   manager.display();
   
-  fill(255);
-  textSize(50);
-  text((map.totalEnemies + " \\ " + map.requiredEnemies), width/2, height/2-50);
-  text((map.totalBosses + " \\ " + map.requiredBosses), width/2, height/2);
-  text((map.totalDiscs + " \\ " + map.requiredDiscs), width/2, height/2+50);
+  //fill(255);
+  //textSize(50);
+  //text((map.totalEnemies + " \\ " + map.requiredEnemies), 100, 200);
+  //text((map.totalBosses + " \\ " + map.requiredBosses), 100, 250);
+  //text((map.totalDiscs + " \\ " + map.requiredDiscs), 100, 300);
   //text(robot.discActive+"",100,200);
   //reportOnMovers();
 }
@@ -240,7 +254,7 @@ public void checkAllMoversForHits()
       
       //*********************
       // Enemy interactions
-      if( movers.get(i) instanceof Enemy && movers.get(j) instanceof Projectile && movers.get(i).intersects(movers.get(j)) )
+      if(movers.get(i) instanceof Enemy && movers.get(j) instanceof Projectile && !movers.get(j).finished && movers.get(i).intersects(movers.get(j)) )
       {
         if( !checkForBlast( (Projectile)movers.get(j) ) )
         {

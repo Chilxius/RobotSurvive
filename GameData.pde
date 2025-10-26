@@ -3,6 +3,8 @@ PImage titlePic,tile,wall,ruin,cap,grid,decor[],exit1,exit2,girder,g_back,g_fron
 PImage missilePic, disc, bolt, laserImage, explosionSmall, explosionBig;
 PImage fireball, fireCharge, voice, brainBlast, skull, bat[];
 
+PImage scientist,end1,end2,end3;
+
 HashMap<String, PImage> upgradeImages = new HashMap<>();
 
 class GameData
@@ -172,5 +174,10 @@ class GameData
     brainBlast = loadImage("brainBlast.png"); brainBlast.resize(missileSize*2,0);
     bat = new PImage[] { loadImage("bat1.png"), loadImage("bat2.png") };
     bat[0].resize(int(missileSize*1.5),0); bat[1].resize(int(missileSize*1.5),0);
+    
+    scientist = loadImage("boss0.png"); scientist.resize(int(data.bossBaseSize),0);
+    end1 = loadImage("end1.png"); end1.resize(height/2,0);
+    end2 = loadImage("end2.png"); end2.resize(height/2,0);
+    end3 = loadImage("end3.png"); end3.resize(height/2,0);
   }
 }

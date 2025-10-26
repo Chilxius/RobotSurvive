@@ -472,8 +472,11 @@ class Map
     if( canLeave ) return;
     
     if( totalDiscs >= requiredDiscs && totalBosses >= requiredBosses && totalEnemies >= requiredEnemies )
+    {
+      ghostWords.add( new GhostWords( "Get to the exit!", width/2, height-100 ) );
       canLeave = true;
       //sound effect
+    }
   }
   
   //Spawn, moving from exit
@@ -613,15 +616,116 @@ class Map
         break;
         
       case 2:
-        randomSpawn( new RatBehavior(), 5 );
+        randomSpawn( new RatBehavior(), 10 );
         break;
         
-      case 3:
+      case 3: //Get 10 discs
         randomSpawn( new RatBehavior(), 5 );
+        randomSpawn( new ZombieBehavior(), 5 );
+        spawnEnemies( new ZombieBehavior(), 10 );
         break;
         
-      case 4:
+      case 4: //Kill 20 zombies
+        randomSpawn( new GhostBehavior(), 5 );
+        randomSpawn( new RatBehavior(), 5 );
+        randomSpawn( new ZombieBehavior(), 5 );
+        spawnEnemies( new ZombieBehavior(), 30 );
+        break;
+        
+      case 5: //Kill Banshee
+        randomSpawn( new GhostBehavior(), 30 );
+        spawnEnemies( new RatBehavior(), 10 );
+        spawnEnemies( new BansheeBehavior(), 1 );
+        break;
+        
+      case 6: //Kill 30 enemies
+        randomSpawn( new GhostBehavior(), 5 );
+        spawnEnemies( new RatBehavior(), 5 );
+        randomSpawn( new SkeletonBehavior(), 20 );
+        spawnEnemies( new SkeletonBehavior(), 30 );
+        break;
+        
+      case 7: //Kill Bosses
+        randomSpawn( new RatBehavior(), 5 );
+        randomSpawn( new GhostBehavior(), 10 );
+        randomSpawn( new SkeletonBehavior(), 30 );
+        spawnEnemies( new MonsterBehavior(), 2 );
+        break;
+        
+      case 8: //Escape with 50 discs
+        randomSpawn( new BansheeBehavior(), 1 );
+        randomSpawn( new RatBehavior(), 20 );
+        randomSpawn( new GhostBehavior(), 20 );
+        randomSpawn( new ZombieBehavior(), 40 );
+        randomSpawn( new SkeletonBehavior(), 40 );
+        spawnEnemies( new MonsterBehavior(), 1 );
+        break;
+        
+      case 9: //Kill 40 enemies
+        randomSpawn( new RatBehavior(), 15 );
+        randomSpawn( new GhostBehavior(), 10 );
+        randomSpawn( new ZombieBehavior(), 10 );
+        randomSpawn( new SkeletonBehavior(), 10 );
+        spawnEnemies( new ZombieBehavior(), 10 );
+        spawnEnemies( new SkeletonBehavior(), 10 );
+        spawnEnemies( new GhoulBehavior(), 30 );
+        spawnEnemies( new MummyBehavior(), 30 );
+        break;
+        
+      case 10: //Kill Brain
         spawnEnemy( new BrainBehavior(), 0, 0 );
+        randomSpawn( new RatBehavior(), 10 );
+        randomSpawn( new GhostBehavior(), 10 );
+        randomSpawn( new ZombieBehavior(), 10 );
+        randomSpawn( new SkeletonBehavior(), 10 );
+        randomSpawn( new MummyBehavior(), 10 );
+        for(int i = 0; i < 5; i++ )
+        {
+          spawnEnemy( new MummyBehavior(), 0, 1 );
+          spawnEnemy( new MummyBehavior(), 1, 0 );
+          spawnEnemy( new GhoulBehavior(), 2, 0 );
+          spawnEnemy( new GhoulBehavior(), 1, 1 );
+          spawnEnemy( new GhoulBehavior(), 0, 2 );
+        }
+        break;
+        
+      case 11: //Get 100 Discs
+        randomSpawn( new RatBehavior(), 10 );
+        randomSpawn( new GhostBehavior(), 10 );
+        spawnEnemies( new VampireBehavior(), 3 );
+        spawnEnemies( new WraithBehavior(), 5 );
+        spawnEnemies( new GhoulBehavior(), 30 );
+        spawnEnemies( new MummyBehavior(), 30 );
+        break;
+        
+      case 12: //Boss Rush
+        randomSpawn( new WraithBehavior(), 30 );
+        randomSpawn( new GhostBehavior(), 30 );
+        spawnEnemies( new ZombieBehavior(), 45 );
+        spawnEnemies( new BansheeBehavior(), 3 );
+        spawnEnemies( new MonsterBehavior(), 2 );
+        spawnEnemies( new VampireBehavior(), 5 );
+        spawnEnemy( new BrainBehavior(), mapSize-1, mapSize-1 );
+        break;
+        
+      case 13: //Lich
+        spawnEnemy( new LichBehavior(), mapSize-1, 0 );
+        spawnEnemies( new GhoulBehavior(), 60 );
+        spawnEnemies( new WraithBehavior(), 30 );
+        spawnEnemies( new VampireBehavior(), 15 );
+        randomSpawn( new MummyBehavior(), 55 );
+        break;
+        
+      case 14: //Vamprie Countess
+        spawnEnemies( new MageBehavior(), 1 );
+        spawnEnemies( new VampireBehavior(), 25 );
+        spawnEnemies( new WraithBehavior(), 25 );
+        break;
+        
+      case 15: //Final Boss
+        randomSpawn( new RatBehavior(), 10 );
+        spawnEnemy( new ScientistBehavior(), 2, mapSize-3 );
+        break;
     }
   }
   
@@ -649,12 +753,12 @@ class Map
         requiredBosses = 0;          //6  - Skeletons (kill skeletons) 5x5
         requiredEnemies = 0;         //7  - SkeletalMonster (kill boss) 5x5
         requiredDiscs = 0;           //8  - Flood of enemies, ghouls? and wraiths?, multiple bosses?, one vampire? (get discs) 6x6
-        break;                       //9  - 
+        break;                       //9  - Mummies and ghouls, plus old enemies (kill enemies) 6x6
                                      //10 - BRAIN (kill boss) 7x7
-      //Some rats                    //11 - Vamps
-      case 2:                        //12 - 
-        requiredBosses = 0;          //13 - 
-        requiredEnemies = 2;         //14 - Vampire Countess
+      //Some rats                    //11 - Vamps (discs)
+      case 2:                        //12 - Wraiths (Banshee x 3, Monster x 2, Brain x 1
+        requiredBosses = 0;          //13 - Lich (kill boss)
+        requiredEnemies = 0;         //14 - Vampire Countess (kill boss)
         requiredDiscs = 0;           //15 - Final boss
         break;
 /*
@@ -663,79 +767,79 @@ Banshee, Dino Skeleton, Brain in a Jar, Lich, Vampire Mage
 */
       case 3:
         requiredBosses = 0;
-        requiredEnemies = 2;
-        requiredDiscs = 0;
+        requiredEnemies = 0;
+        requiredDiscs = 10;
         break;
         
       case 4:
         requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredEnemies = 20;
         requiredDiscs = 0;
         break;
         
       case 5:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredBosses = 1;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 6:
         requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredEnemies = 30;
         requiredDiscs = 0;
         break;
         
       case 7:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredBosses = 2;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 8:
         requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 9:
         requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredEnemies = 40;
         requiredDiscs = 0;
         break;
         
       case 10:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredBosses = 1;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 11:
         requiredBosses = 0;
-        requiredEnemies = 2;
-        requiredDiscs = 0;
+        requiredEnemies = 0;
+        requiredDiscs = 100;
         break;
         
-      case 12:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+      case 12: //Boss rush?
+        requiredBosses = 6;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 13:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredBosses = 1;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
       case 14:
-        requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredBosses = 1;
+        requiredEnemies = 0;
         requiredDiscs = 0;
         break;
         
-      case 15:
+      case 15: //Final room - can't leave
         requiredBosses = 0;
-        requiredEnemies = 2;
+        requiredEnemies = 1;
         requiredDiscs = 0;
         break;
     }

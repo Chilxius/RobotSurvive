@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash = 0;
+  int cash = 1200;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   
@@ -280,7 +280,8 @@ class Robot extends MovingThing
       new GhostWords(d,xPos,yPos);
       if( armor <= 0 )
       {
-        //DEAD - go to BREAKDOWN
+        gameOver = new GameOver();
+        //manager.goToBreakdown();
       }
     }
   }

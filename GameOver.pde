@@ -46,9 +46,11 @@ class GameOver
     
     over = false;
     clearMovers();
-    map = new Map(mapLevel);
+    map = new Map(map.level);
     robot.xPos = map.startingPoint('x');
     robot.yPos = map.startingPoint('y');
+    robot.armor = robot.getMaxArmor();
+    robot.bumpX = robot.bumpY = 0;
     map.initialSpawn();
     manager.goToSurvival();
   }
