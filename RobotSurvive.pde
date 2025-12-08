@@ -1,6 +1,10 @@
 //Game Jam Challenge: One Button
 //Robots vs Vampires
 
+//Issues:
+  // laser explosions in wrong place
+  // no rats on final level
+  // fully upgrades missiles OP
 
 
 //Get the robot and map un-coupled for end-of-level operations
@@ -374,8 +378,8 @@ public void keyPressed()
   //  robot.activateUpgrade("Multi-Disc 2");
   //if( key == '3' )
   //  robot.activateUpgrade("Multi-Disc 3");
-  if( key == ' ' )
-  {
+  //if( key == ' ' )
+  //{
     //setupTestingStuff();
     //map.spawnEnemy( new ZombieBehavior(), 1, 1 );
     //gameOver = new GameOver();
@@ -383,7 +387,7 @@ public void keyPressed()
     //map.spawnEnemies( new ZombieBehavior(), 6 );
     //robot.cash++;
     //map.totalDiscs++;
-  }
+  //}
   //if( key == 'q' )
   //  new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
   //if( key == 'w' )

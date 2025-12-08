@@ -44,7 +44,7 @@ class MenuState implements GameState
   
   void reactToRelease()
   {
-    
+    /* NOT USED */
   }
 }
 

@@ -19,7 +19,7 @@ class Robot extends MovingThing
   boolean turning;
   boolean turningClockwise;
   
-  int cash = 1200;
+  int cash = 0;
   
   ArrayList<Pointer> pointer = new ArrayList<Pointer>();
   

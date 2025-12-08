@@ -119,7 +119,7 @@ class Enemy extends MovingThing
     drawEffect();
     
     //circle(xPos+data.xOffset,hitBox()+data.yOffset,size);
-    text(health+"/"+behavior.maxHealth,xPos+data.xOffset,yPos+data.yOffset-40);
+    //text(health+"/"+behavior.maxHealth,xPos+data.xOffset,yPos+data.yOffset-40);
   }
   
   private void drawEffect()

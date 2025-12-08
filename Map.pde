@@ -723,7 +723,6 @@ class Map
         break;
         
       case 15: //Final Boss
-        randomSpawn( new RatBehavior(), 10 );
         spawnEnemy( new ScientistBehavior(), 2, mapSize-3 );
         break;
     }
