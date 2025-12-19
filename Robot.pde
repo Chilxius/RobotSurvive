@@ -628,6 +628,8 @@ class Pointer
   }
 }
 
+//This never got used beyond basic robot image - a fun idea I might try to finish later
+
 //*****************************************
 // Cosmetic Kit for robot visuals and sound
 class CosmeticKit

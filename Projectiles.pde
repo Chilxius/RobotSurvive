@@ -74,13 +74,21 @@ class Missile extends MovingThing implements Projectile
   @Override
   public void bounce( Block b )
   {
+    //if( robot.upgrades.get("Bouncing Missile") )
+    //  super.bounce(b);
+    //else if( robot.upgrades.get("Demolition Missile") )
+    //{
+    //  b.demolish();
+    //  expiration = 0;
+    //}
+    //else
+    //  expiration = 0;
+    
+    if( robot.upgrades.get("Demolition Missile") )
+      b.demolish();
+    
     if( robot.upgrades.get("Bouncing Missile") )
       super.bounce(b);
-    else if( robot.upgrades.get("Demolition Missile") )
-    {
-      b.demolish();
-      expiration = 0;
-    }
     else
       expiration = 0;
   }

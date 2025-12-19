@@ -1006,7 +1006,10 @@ class Block
   public void demolish()
   {
     if( state == BlockState.SOLID )
+    {
       state = BlockState.BROKEN;
+      
+    }
   }
   
   public boolean intersects( MovingThing m )

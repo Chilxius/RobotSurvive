@@ -41,7 +41,7 @@ public void buildTree()
         upgradeTree.children.get(0).left.left.left = new Node( new Upgrade("Movement Speed 4") );
       upgradeTree.children.get(0).left.right = new Node( new Upgrade("Knockback Resist") );
         upgradeTree.children.get(0).left.right.left = new Node( new Upgrade("Pushback") );
-          upgradeTree.children.get(0).left.left.left.left = new Node( new Upgrade("Forceful Pushback") );
+          upgradeTree.children.get(0).left.right.left.left = new Node( new Upgrade("Forceful Pushback") );
     upgradeTree.children.get(0).right = new Node( new Upgrade("Rotation Speed 1") );//upgradeTree.children.get(0).right.value.taken=true;
       upgradeTree.children.get(0).right.left = new Node( new Upgrade("Rotation Speed 2") );
         upgradeTree.children.get(0).right.left.left = new Node( new Upgrade("Rotation Speed 3") );

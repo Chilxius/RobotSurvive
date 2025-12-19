@@ -2,16 +2,12 @@
 //Robots vs Vampires
 
 //Issues:
+  // forceful pushback can knock enemies out of bounds
   // laser explosions in wrong place
-  // no rats on final level
-  // fully upgrades missiles OP
-
+  // fully upgraded missiles OP
 
 //Get the robot and map un-coupled for end-of-level operations
 //De-couple pointer's draw from its move
-
-//Only make movers draw if on screen
-//Make installs only happen when wheel stops, not constantly
 
 //Stretch Goals:
 //Curse attack
@@ -20,11 +16,9 @@
 //Fancy level start (elevator, tube, etc.)
 //Sound
 //Final cinematic
-//Opening cinematic
-//Decorate upgrade wheel
 //Keep robot from getting stuck on walls when bumped
 //Little longer wait before banking discs
-//End-of-level stuff still so bad...
+//Visit upgrade wheel when continuing after deaths
 //PANIC: release super-attack when at low health once per map/game
 
 import processing.sound.*;
@@ -80,7 +74,6 @@ void setup()
   
   data = new GameData();
   data.loadImages();
-  
   
   upgradeTree = new RootNode<>( new Upgrade("Root") );
   buildTree();
@@ -296,11 +289,7 @@ public void checkMoversForRemoval()
 public void createUpgradeTree( Robot r )
 { 
   for(String s: upgradeImages.keySet())
-  {
-    //println( s );
     r.upgrades.put(s,false);
-  } 
-  //println(r.upgrades);
 }
 
 public boolean checkForBlast( Projectile p )
@@ -325,15 +314,15 @@ public boolean checkForBlast( Projectile p )
   return true;
 }
 
-public void reportOnMovers()
-{
-  ArrayList<MovingThing> moversOnScreen = new ArrayList<MovingThing>();
-  for(MovingThing m: movers)
-    if( m.onScreen() )
-      moversOnScreen.add(m);
-  textAlign(LEFT);
-  text("Movers: " + movers.size() + " / On Screen: " + moversOnScreen.size(), 100, 100 );
-}
+//public void reportOnMovers()
+//{
+//  ArrayList<MovingThing> moversOnScreen = new ArrayList<MovingThing>();
+//  for(MovingThing m: movers)
+//    if( m.onScreen() )
+//      moversOnScreen.add(m);
+//  textAlign(LEFT);
+//  text("Movers: " + movers.size() + " / On Screen: " + moversOnScreen.size(), 100, 100 );
+//}
 
 public void clearMovers()
 {
@@ -361,43 +350,6 @@ public void mouseReleased(){keyReleased();}
 public void keyPressed()
 {
   manager.reactToPress();
-  //if( key == 'm' )
-  //  new Missile(robot,robot.missileDamage());
-  //if( key == 'd' )
-  //  new Disc(robot,robot.discDamage());
-  //if( key == 'k' )
-  //{
-  //  testEnemy.dead = true;
-  //  new Pickup(testEnemy);
-  //}
-  //if( key == 'l' )
-  //  new Laser(robot,robot.laserDamage());
-  //if( key == '1' )
-  //  robot.activateUpgrade("Multi-Disc 1");
-  //if( key == '2' )
-  //  robot.activateUpgrade("Multi-Disc 2");
-  //if( key == '3' )
-  //  robot.activateUpgrade("Multi-Disc 3");
-  //if( key == ' ' )
-  //{
-    //setupTestingStuff();
-    //map.spawnEnemy( new ZombieBehavior(), 1, 1 );
-    //gameOver = new GameOver();
-    //map.randomSpawn( new RatBehavior(), 5 );
-    //map.spawnEnemies( new ZombieBehavior(), 6 );
-    //robot.cash++;
-    //map.totalDiscs++;
-  //}
-  //if( key == 'q' )
-  //  new GhostWords( 25, testEnemy.xPos, testEnemy.yPos );
-  //if( key == 'w' )
-  //  new GhostWords( "Press to Spin Upgrade Wheel", width*2/3, height-150 );
-  //if( key == 'b' )
-  //  robot.activateUpgrade("Blast Radius 1");
-  //if( key == 'x' )
-  //  robot.activateUpgrade("Blast Radius 2");
-  //if( key == 'f' )
-  //  new Fireball(testEnemy, testEnemy.damage);
 }
 
 public void keyReleased()
